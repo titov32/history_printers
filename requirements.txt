@@ -1,0 +1,7 @@
+fastapi == 0.78
+sqlalchemy == 1.4.39
+asyncpg == 0.25
+uvicorn
+alembic
+psycopg2-binary
+qrcode == 7.3.1
