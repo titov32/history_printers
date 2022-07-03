@@ -50,6 +50,7 @@ class ModelPrinter(Base):
     brand = sa.Column(sa.String, nullable = False)
     model = sa.Column(sa.String, nullable = False)
     type_p = sa.Column(sa.String)
+    format_paper = sa.Column(sa.String)
     printers = orm.relationship("Printer", back_populates='model_printer')
     cartridges = orm.relationship('Cartridge', secondary=association_cartridge,
                                   back_populates='model_printers')
@@ -62,9 +63,10 @@ class Printer(Base):
     model_printer = orm.relationship("ModelPrinter", back_populates='printers')
     departament = sa.Column(sa.String)
     ip = sa.Column(sa.String, default=None)
-    sn = sa.Column(sa.String, unique = True)
+    sn = sa.Column(sa.String, unique=True)
     is_work = sa.Column(sa.Boolean, default=True)
     is_free = sa.Column(sa.Boolean, default=False)
+    repairing = sa.Column(sa.Boolean, default = True)
     histories = orm.relationship('History', back_populates='printer')
 
 

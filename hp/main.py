@@ -31,7 +31,7 @@ def get_db():
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email already is registered")
     return crud.create_user(db=db, user=user)
 
 
@@ -45,7 +45,7 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="User is not found")
     return db_user
 
 
@@ -66,7 +66,7 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def read_cartridge(cartridge_id: int, db: Session = Depends(get_db)):
     db_cartridge = crud.get_cartridge(db, cartridge_id)
     if db_cartridge is None:
-        raise HTTPException(status_code=404, detail="Cartridge not found")
+        raise HTTPException(status_code=404, detail="Cartridge is not found")
     return db_cartridge
 
 
@@ -105,7 +105,7 @@ def update_printer(printer: schemas.Printer,
                    db: Session = Depends(get_db)):
     db_printer = crud.get_printer_by_id(db, printer.id)
     if db_printer is None:
-        raise HTTPException(status_code=404, detail="Printer not found")
+        raise HTTPException(status_code=404, detail="Printer is not found")
     return crud.update_printer(db, printer)
 
 
@@ -113,10 +113,22 @@ def update_printer(printer: schemas.Printer,
 def delete_printer(printer: schemas.Printer, db: Session = Depends(get_db)):
     return crud.delete_printer(db, printer.id)
 
-@app.get("/printer/{printer_id}") #, response_model=schemas.Cartridge
+@app.get("/printer/{printer_id}")
 def read_printer(printer_id: int, db: Session = Depends(get_db)):
-    db_printer: models.Printer = crud.get_printer_by_id(db, printer_id)
+    """
+    авававава
+    :param printer_id:
+    :param db:
+    :return:
+    """
+    db_printer = crud.get_printer_by_id_with_history(db, printer_id)
     if db_printer is None:
-        raise HTTPException(status_code=404, detail="Cartridge not found")
-    db_printer.__dict__['qr']=f'http://{DOMAIN_NAME}/static/Printer_id_{db_printer.id}.png'
+        raise HTTPException(status_code=404, detail="Printer is not found")
+    # db_printer.__dict__['qr']=f'http://{DOMAIN_NAME}/static/Printer_id_{db_printer.id}.png'
     return db_printer
+
+
+@app.post("/{user_id}/history")
+def create_history_printer(user_id:int, history: schemas.HistoryBase,
+                           db: Session = Depends(get_db)):
+    return crud.create_history_printer(user_id, history, db)
