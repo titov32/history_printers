@@ -12,8 +12,11 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    items = orm.relationship("Item", back_populates="owner")
+    items = orm.relationship("Item", back_populates='owner')
     histories = orm.relationship("History", back_populates="author")
+
+    def __repr__(self):
+        return f'UserID {self.id} UserEmail {self.email}'
 
 
 class Item(Base):
@@ -24,7 +27,10 @@ class Item(Base):
     description = Column(String, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = orm.relationship("User", back_populates="items")
+    owner = orm.relationship("User", back_populates='items')
+
+    def __repr__(self):
+        return f'ItemID={self.id}, item_title="{self.title}"'
 
 
 association_cartridge = sa.Table(
@@ -38,7 +44,7 @@ association_cartridge = sa.Table(
 class Cartridge(Base):
     __tablename__ = 'cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
-    number = sa.Column(sa.String, nullable = False)
+    number = sa.Column(sa.String, nullable=False)
     model_printers = orm.relationship('ModelPrinter', secondary=association_cartridge,
                                       back_populates='cartridges')
     departament = sa.Column(sa.String)
@@ -47,8 +53,8 @@ class Cartridge(Base):
 class ModelPrinter(Base):
     __tablename__ = "model_printer"
     id = sa.Column(sa.Integer, primary_key=True)
-    brand = sa.Column(sa.String, nullable = False)
-    model = sa.Column(sa.String, nullable = False)
+    brand = sa.Column(sa.String, nullable=False)
+    model = sa.Column(sa.String, nullable=False)
     type_p = sa.Column(sa.String)
     format_paper = sa.Column(sa.String)
     printers = orm.relationship("Printer", back_populates='model_printer')
@@ -66,16 +72,19 @@ class Printer(Base):
     sn = sa.Column(sa.String, unique=True)
     is_work = sa.Column(sa.Boolean, default=True)
     is_free = sa.Column(sa.Boolean, default=False)
-    repairing = sa.Column(sa.Boolean, default = True)
-    histories = orm.relationship('History', back_populates='printer')
+    repairing = sa.Column(sa.Boolean, default=True)
+    histories = orm.relationship('History',
+                                 back_populates='printer',
+                                 cascade="all, delete",
+                                 passive_deletes=True, )
 
 
 class History(Base):
     __tablename__ = 'history'
     id = sa.Column(sa.Integer, primary_key=True)
-    printer_id = sa.Column(sa.Integer, sa.ForeignKey('printer.id'))
+    printer_id = sa.Column(sa.Integer, sa.ForeignKey('printer.id', ondelete="CASCADE"))
     printer = orm.relationship('Printer', back_populates='histories')
     date = sa.Column(sa.DateTime)
     description = sa.Column(sa.Text)
     author_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
-    author = orm.relationship('User', back_populates = "histories")
+    author = orm.relationship('User', back_populates="histories")
