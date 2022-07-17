@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy import orm
 import sqlalchemy as sa
-from db import Base
+from hp.db import Base
 
 
 class User(Base):

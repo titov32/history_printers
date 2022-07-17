@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, update, delete
 from datetime import datetime
 
-import models
-import schemas
+from hp import models
+from hp import schemas
 
 
 async def get_user(db: AsyncSession, user_id: int):

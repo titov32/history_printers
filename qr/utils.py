@@ -1,5 +1,5 @@
 import qrcode
-from hp.config import DOMAIN_NAME
+from config import DOMAIN_NAME
 
 
 def make_qr_code_by_path(path, name):
