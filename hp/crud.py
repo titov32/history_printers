@@ -1,31 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, update, delete
 from datetime import datetime
 
 from hp import models
 from hp import schemas
-
-
-async def get_user(db: AsyncSession, user_id: int):
-    query = select(models.User).where(models.User.id == user_id)
-    users = await db.execute(query)
-    user = users.first()[0]
-
-    return user
-
-
-async def get_user_by_email(db: AsyncSession, email: str):
-    statement = select(models.User).where(models.User.email == email)
-    return (await db.execute(statement)).all()
-
-
-async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
-    query: select = select(models.User, models.Item) \
-        .join(models.Item.owner) \
-        .where(models.User.id >= skip).limit(limit)
-    users = await db.execute(query)
-    users_all = users.all()
-    return users_all
+from qr.utils import make_qr_code_by_path
 
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
@@ -41,33 +20,44 @@ async def create_user(db: AsyncSession, user: schemas.UserCreate):
     return user
 
 
-async def get_items(db: AsyncSession, skip: int = 0, limit: int = 100):
-    statement = select(models.Item).where(models.Item.id > skip).limit(limit)
-    items = (await db.execute(statement)).all()
-    return items
+async def get_user(db: AsyncSession, user_id: int):
+    query = select(models.User).where(models.User.id == user_id)
+    users = await db.execute(query)
+    user = users.first()[0]
+    return user
 
 
-async def create_user_item(db: AsyncSession, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
-    db.add(db_item)
-    await db.commit()
-    await db.refresh(db_item)
-    return db_item
+async def get_user_by_email(db: AsyncSession, email: str):
+    statement = select(models.User).where(models.User.email == email)
+    return (await db.execute(statement)).all()
+
+
+async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
+    query: select = select(models.User, models.Item) \
+        .join(models.Item.owner) \
+        .where(models.User.id >= skip).limit(limit)
+    users = await db.execute(query)
+    users_all = users.all()
+    # TODO Убрать items
+    return users_all
 
 
 async def get_cartridge(db: AsyncSession, cartridge_id: int):
-    statement = select(models.Cartridge).where(models.Cartridge.id == cartridge_id)
+    statement = select(models.Cartridge)\
+                .where(models.Cartridge.id == cartridge_id)
     cartridges = await db.execute(statement)
     return cartridges.all()
 
 
 async def get_printer_by_model(db: AsyncSession, model: str):
-    statement = select(models.ModelPrinter).where(models.ModelPrinter.model == model)
+    statement = select(models.ModelPrinter)\
+                .where(models.ModelPrinter.model == model)
     return (await db.execute(statement)).first()
 
 
 async def get_model_printer_by_id(db: AsyncSession, id_: int):
-    statement = select(models.ModelPrinter).where(models.ModelPrinter.id == id_)
+    statement = select(models.ModelPrinter)\
+                .where(models.ModelPrinter.id == id_)
     return (await db.execute(statement)).first()
 
 
@@ -87,6 +77,23 @@ async def create_model(db: AsyncSession, printer: schemas.ModelPrinterCreate):
     return db_printer
 
 
+async def update_model_printer(db: AsyncSession, printer: schemas.ModelPrinter):
+    db_printer = models.ModelPrinter(brand=printer.brand,
+                                     id=printer.id,
+                                     model=printer.model,
+                                     type_p=printer.type_p.value,
+                                     format_paper=printer.format_paper.value)
+    await db.merge(db_printer)
+    await db.commit()
+    return db_printer
+
+
+async def read_model_printers(db: AsyncSession):
+    statement = select(models.ModelPrinter)
+    response = await db.execute(statement)
+    return response.all()
+
+
 async def create_printer(db: AsyncSession, printer: schemas.Printer):
     db_printer = models.Printer(**printer.dict())
     db.add(db_printer)
@@ -96,6 +103,12 @@ async def create_printer(db: AsyncSession, printer: schemas.Printer):
         print(f'Error!!! {e}')
         await db.rollback()
         raise
+    await db.refresh(db_printer)
+    # создание qr-code и запись в БД
+    path_to_printer_in_qr = f'/printer/{db_printer.id}'
+    name = f'Printer_id_{db_printer.id}'
+    db_printer.qr = make_qr_code_by_path(path_to_printer_in_qr, name)
+    await db.commit()
     await db.refresh(db_printer)
     return db_printer
 
@@ -128,8 +141,6 @@ async def get_printer_by_id_with_history(db: AsyncSession, id: int):
 
 
 async def update_printer(db: AsyncSession, printer: schemas.Printer):
-    # update(models.Printer).where(models.Printer.id == printer.id). \
-    #     update(printer.dict(), synchronize_session="fetch")
     statement = update(models.Printer) \
         .where(models.Printer.id == printer.id) \
         .values(printer.dict())
@@ -139,14 +150,10 @@ async def update_printer(db: AsyncSession, printer: schemas.Printer):
 
 
 async def delete_printer(db: AsyncSession, printer_id):
-    # это стиль 2.0х
     printer_delete = delete(models.Printer).where(models.Printer.id == printer_id). \
         execution_options(synchronize_session="fetch")
     await db.execute(printer_delete)
     await db.commit()
-    # это стиль 1.0, с async не работает
-    # db.query(models.Printer).filter(models.Printer.id == printer_id).delete(synchronize_session="fetch")
-    # db.commit()
     return {"delete printer_id": printer_id}
 
 

@@ -3,22 +3,6 @@ from pydantic import BaseModel
 from ipaddress import IPv4Interface
 from enum import Enum
 
-class ItemBase(BaseModel):
-    title: str
-    description: Union[str, None] = None
-
-
-class ItemCreate(ItemBase):
-    pass
-
-
-class Item(ItemBase):
-    id: int
-    owner_id: int
-
-    class Config:
-        orm_mode = True
-
 
 class UserBase(BaseModel):
     email: str
@@ -31,7 +15,6 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    items: List[Item] = []
 
     class Config:
         orm_mode = True
@@ -51,11 +34,13 @@ class TypeEnum(Enum):
     m = 'МФУ'
     p = 'Принтер'
 
+
 class FormatEnum(Enum):
     A0 = 'A0'
     A1 = 'A1'
     A3 = 'A3'
     A4 = 'A4'
+
 
 class ModelPrinterBase(BaseModel):
     brand: str
@@ -85,12 +70,13 @@ class PrinterBase(BaseModel):
     repairing: Optional[bool] = False
 
 
-
 class Printer(PrinterBase):
     id: int
+    qr: str
 
     class Config:
         orm_mode = True
+
 
 class PrinterCreate(PrinterBase):
     pass

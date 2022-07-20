@@ -1,6 +1,7 @@
-from db import Base
 from sqlalchemy import create_engine
 from config import DATABASEURL
+from hp import models
+from hp.models import Base
 
 SQLALCHEMY_DATABASE_URL = f'postgresql://{DATABASEURL}'
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
