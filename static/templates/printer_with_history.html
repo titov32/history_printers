@@ -22,7 +22,7 @@
     <tbody>
     {% for printer in printers %}
     <tr>
-         <td> {{printer.model_id}} </td>
+         <td> {{printer.histories.description}} </td>
          <td> {{printer.departament}} </td>
          <td> {{printer.ip}} </td>
          <td> {{printer.sn}} </td>
@@ -38,8 +38,8 @@
      {% endfor %}
     </tbody>
 </table>
-
-<h3>Добавление нового принтера</h3>
+<p> {{printers}}</p>
+<h3>Добавление информации по принтеру</h3>
 <form class="row g-3" method="post">
   <div class="col-md-4">
     <label for="brand" class="form-label">Марка</label>

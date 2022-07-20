@@ -44,7 +44,17 @@ async def create_model_printer(request: Request,
 
 
 @hp_html_router.get("/printer/{id}", response_class=HTMLResponse)
-async def get_all_models_printer(request: Request, db: AsyncSession = Depends(get_db)):
-    models = await crud.read_model_printers(db)
-    return templates.TemplateResponse("printer.html",
-                                      {"request": request, "models": models})
+async def get_printer_with_history(request: Request, id: int, db: AsyncSession = Depends(get_db)):
+    printer = await crud.get_printer_by_id_with_history(db, id)
+    # TODO нужно доработать шаблон для принтера с историей
+    return templates.TemplateResponse("printer_with_history.html",
+                                      {"request": request, "printers": printer})
+
+
+@hp_html_router.get("/printers", response_class=HTMLResponse)
+async def get_all_printers(request: Request, db: AsyncSession = Depends(get_db)):
+    printers = await crud.get_all_printers(db)
+    return templates.TemplateResponse("printers.html",
+                                      {"request": request, "printers": printers})
+
+    #TODO нужно доработать форму заведения нового принтера
