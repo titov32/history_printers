@@ -79,6 +79,12 @@ async def edit_model_printer(printer: schemas.ModelPrinter,
     return await crud.update_model_printer(db, printer)
 
 
+@hp_api_router.delete("/model_printer/{id_}")
+async def remove_model_printer(id_: int,
+                               db: AsyncSession = Depends(get_db)):
+    return await crud.delete_model_printer(db=db, id_=id_)
+
+
 @hp_api_router.post("/printer/")  # , response_model=schemas.Printer)
 async def create_printer(printer: schemas.PrinterCreate,
                          db: AsyncSession = Depends(get_db)):

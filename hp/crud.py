@@ -62,6 +62,7 @@ async def get_model_printer_by_id(db: AsyncSession, id_: int):
 
 
 async def create_model(db: AsyncSession, printer: schemas.ModelPrinterCreate):
+
     db_printer = models.ModelPrinter(brand=printer.brand,
                                      model=printer.model,
                                      type_p=printer.type_p.value,
@@ -91,7 +92,15 @@ async def update_model_printer(db: AsyncSession, printer: schemas.ModelPrinter):
 async def read_model_printers(db: AsyncSession):
     statement = select(models.ModelPrinter)
     response = await db.execute(statement)
-    return response.all()
+    return response.scalars().all()
+
+
+async def delete_model_printer(db: AsyncSession, id_: int):
+    statement = delete(models.ModelPrinter)\
+                .where(models.ModelPrinter.id == id_)
+    await db.execute(statement)
+    await db.commit()
+    return {"delete model_printer_id": id_}
 
 
 async def create_printer(db: AsyncSession, printer: schemas.Printer):
@@ -137,7 +146,12 @@ async def get_printer_by_id_with_history(db: AsyncSession, id: int):
         .join(models.History, isouter=True) \
         .order_by(models.History.date.desc())
     printers = await db.execute(statement)
-    return printers.all()
+    history = select(models.History)\
+                .where(models.History.printer_id==id) \
+                .order_by(models.History.date.desc())
+    hist_response = await db.execute(history)
+
+    return printers.all()+hist_response.scalars().all()
 
 
 async def update_printer(db: AsyncSession, printer: schemas.Printer):
