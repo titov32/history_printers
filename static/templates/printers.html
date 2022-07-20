@@ -1,0 +1,85 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+
+
+<table class="table table-striped table-white">
+    <thead class="thead-white">
+
+    <tr>
+        <th scope="col"> <b> Модель</b> </th>
+        <th scope="col"> <b>Отдел</b> </th>
+        <th scope="col"><b>IP</b> </th>
+        <th scope="col"><b>SN</b> </th>
+        <th scope="col"><b>В ходу</b> </th>
+        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>QR</b> </th>
+    </tr>
+    <tbody>
+    {% for printer in printers %}
+    <tr>
+         <td> {{printer.model_id}} </td>
+         <td> {{printer.departament}} </td>
+         <td> {{printer.ip}} </td>
+         <td> {{printer.sn}} </td>
+         <td> {{printer.is_work}} </td>
+        <td> {{printer.is_free}} </td>
+        <td> {{printer.repairing}} </td>
+        <td> <img src={{printer.qr}} width="100" height="100"
+     alt="QR"> </td>
+         <td> <a class="pressed-button"
+                 href="/erase_model/{{printer.id}}"
+                 method = 'post'> удалить</a> </td>
+    </tr>
+     {% endfor %}
+    </tbody>
+</table>
+
+<h3>Добавление нового принтера</h3>
+<form class="row g-3" method="post">
+  <div class="col-md-4">
+    <label for="brand" class="form-label">Марка</label>
+    <input type="text" class="form-control" name="brand" id="brand" value="Kyocera" >
+  </div>
+  <div class="col-md-4">
+    <label for="model" class="form-label">Модель</label>
+    <input type="text" class="form-control" name="model" id="model" value="m2035" >
+  </div>
+
+  <div class="col-md-3">
+    <label for="type_p" class="form-label">Тип</label>
+    <select class="form-select" name="type_p" id="type_p" >
+      <option selected value="МФУ">МФУ</option>
+      <option>Принтер</option>
+    </select>
+  </div>
+      <div class="col-md-3">
+    <label for="format_paper" class="form-label">Формат бумаги</label>
+    <select class="form-select" name="format_paper" id="format_paper" >
+      <option selected value="A4">А4</option>
+      <option>A3</option>
+        <option>A0</option>
+    </select>
+  </div>
+    <div class="col-12">
+    <button class="btn btn-primary" type="submit">Отправить форму</button>
+  </div>
+</form>
+
+<a class="pressed-button" href="/parse_unbound"> Печать всех из не привязанных</a>
+<br>
+<a class="pressed-button" href="/parse_unbound_one_permit"> Выбор одного из не привязанных</a>
+
+
+
+<form method="post">
+    <input type="number" name="num" value="1234"/>
+    <input type="submit">
+</form>
+
+
+{% endblock %}

@@ -10,23 +10,29 @@
     <thead class="thead-white">
 
     <tr>
-        <th scope="col"> <b> id</b> </th>
-        <th scope="col"> <b>Брэнд</b> </th>
-        <th scope="col"><b>Модель</b> </th>
-        <th scope="col"><b>Тип</b> </th>
-        <th scope="col"><b>Формат бумаги</b> </th>
-        <th scope="col"><b>Операция</b> </th>
+        <th scope="col"> <b> Модель</b> </th>
+        <th scope="col"> <b>Отдел</b> </th>
+        <th scope="col"><b>IP</b> </th>
+        <th scope="col"><b>SN</b> </th>
+        <th scope="col"><b>В ходу</b> </th>
+        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>QR</b> </th>
     </tr>
     <tbody>
-    {% for model in models %}
+    {% for printer in printers %}
     <tr>
-         <td> {{model.id}} </td>
-         <td> {{model.brand}} </td>
-         <td> {{model.model}} </td>
-         <td> {{model.type_p}} </td>
-         <td> {{model.format_paper}} </td>
+         <td> {{printer.model_id}} </td>
+         <td> {{printer.departament}} </td>
+         <td> {{printer.ip}} </td>
+         <td> {{printer.sn}} </td>
+         <td> {{printer.is_work}} </td>
+        <td> {{printer.is_free}} </td>
+        <td> {{printer.repairing}} </td>
+        <td> <img src={{printer.qr}} width="100" height="100"
+     alt="QR"> </td>
          <td> <a class="pressed-button"
-                 href="/erase_model/{{model.id}}"
+                 href="/erase_model/{{printer.id}}"
                  method = 'post'> удалить</a> </td>
     </tr>
      {% endfor %}
