@@ -25,7 +25,7 @@
          <td> {{printer.model_id}} </td>
          <td> {{printer.departament}} </td>
          <td> {{printer.ip}} </td>
-         <td> {{printer.sn}} </td>
+         <td><a href="/printer/{{printer.id}}"> {{printer.sn}}</a>  </td>
          <td> {{printer.is_work}} </td>
         <td> {{printer.is_free}} </td>
         <td> {{printer.repairing}} </td>
@@ -42,44 +42,51 @@
 <h3>Добавление нового принтера</h3>
 <form class="row g-3" method="post">
   <div class="col-md-4">
-    <label for="brand" class="form-label">Марка</label>
-    <input type="text" class="form-control" name="brand" id="brand" value="Kyocera" >
+        <label for="model_id" class="form-label">Модель ID</label>
+        <input type="text" class="form-control" name="model_id" id="model_id" value="1" >
   </div>
   <div class="col-md-4">
-    <label for="model" class="form-label">Модель</label>
-    <input type="text" class="form-control" name="model" id="model" value="m2035" >
+        <label for="departament" class="form-label">Отдел</label>
+        <input type="text" class="form-control" name="departament" id="departament" value="Тех комплекс" >
   </div>
 
   <div class="col-md-3">
-    <label for="type_p" class="form-label">Тип</label>
-    <select class="form-select" name="type_p" id="type_p" >
-      <option selected value="МФУ">МФУ</option>
-      <option>Принтер</option>
-    </select>
+      <label for="ip" class="form-label">IP</label>
+     <input type="text" class="form-control" name="ip" id="ip" value="192.168.0.0" >
   </div>
-      <div class="col-md-3">
-    <label for="format_paper" class="form-label">Формат бумаги</label>
-    <select class="form-select" name="format_paper" id="format_paper" >
-      <option selected value="A4">А4</option>
-      <option>A3</option>
-        <option>A0</option>
-    </select>
+  <div class="col-md-3">
+      <label for="sn" class="form-label">Серийный номер</label>
+      <input type="text" class="form-control" name="sn" id="sn" value="abcd1234" >
   </div>
+  <div class="col-md-3">
+        <label for="is_work" class="form-label">В работе</label>
+        <select class="form-select" name="is_work" id="is_work" >
+          <option selected value="true">true</option>
+          <option>false</option>
+        </select>
+  </div>
+    <div class="col-md-3">
+        <label for="is_free" class="form-label">Свободен</label>
+        <select class="form-select" name="is_free" id="is_free" >
+          <option selected value="false">false</option>
+          <option>true</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="repairing" class="form-label">В ремонте</label>
+        <select class="form-select" name="repairing" id="repairing" >
+              <option selected value="true">true</option>
+              <option>false</option>
+        </select>
+    </div>
     <div class="col-12">
-    <button class="btn btn-primary" type="submit">Отправить форму</button>
+    <button class="btn btn-primary" type="submit">Создать принтер</button>
   </div>
 </form>
 
-<a class="pressed-button" href="/parse_unbound"> Печать всех из не привязанных</a>
-<br>
-<a class="pressed-button" href="/parse_unbound_one_permit"> Выбор одного из не привязанных</a>
 
 
 
-<form method="post">
-    <input type="number" name="num" value="1234"/>
-    <input type="submit">
-</form>
 
 
 {% endblock %}

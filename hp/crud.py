@@ -105,7 +105,8 @@ async def delete_model_printer(db: AsyncSession, id_: int):
     return {"delete model_printer_id": id_}
 
 
-async def create_printer(db: AsyncSession, printer: schemas.Printer):
+async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
+    printer.ip = printer.ip.ip.exploded
     db_printer = models.Printer(**printer.dict())
     db.add(db_printer)
     try:
@@ -149,20 +150,18 @@ async def get_printer_by_id(db: AsyncSession, id: int):
 
 
 async def get_printer_by_id_with_history(db: AsyncSession, id: int):
-    statement = select(models.Printer, models.History) \
-        .where(models.Printer.id == id) \
-        .join(models.History, isouter=True) \
+    statement = select(models.History,
+                       models.User) \
+        .where(models.History.printer_id == id) \
+        .join(models.Printer) \
+        .join(models.User) \
         .order_by(models.History.date.desc())
     printers = await db.execute(statement)
-    history = select(models.History)\
-                .where(models.History.printer_id==id) \
-                .order_by(models.History.date.desc())
-    hist_response = (await db.execute(history)).scalars().all()
-    prn = [printers]
-    prn = printers.all() #+ hist_response.scalars().all()
-
-
-    return prn
+    statement = select(models.ModelPrinter, models.Printer) \
+                .where(models.Printer.id==id) \
+                .join(models.Printer)
+    models_printer = await db.execute(statement)
+    return models_printer.all() + printers.all()
 
 
 async def update_printer(db: AsyncSession, printer: schemas.Printer):
@@ -182,7 +181,7 @@ async def delete_printer(db: AsyncSession, printer_id):
     return {"delete printer_id": printer_id}
 
 
-async def create_history_printer(user_id, history: schemas.HistoryBase, db: AsyncSession):
+async def create_history_printer( db: AsyncSession, user_id, history: schemas.HistoryBase):
     db_history = models.History(**history.dict(), author_id=user_id,
                                 date=datetime.now())
     db.add(db_history)

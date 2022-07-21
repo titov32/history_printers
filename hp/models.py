@@ -70,6 +70,9 @@ class Printer(Base):
                                  cascade="all, delete",
                                  passive_deletes=True, )
 
+    def __repr__(self):
+        return f'Printer id={self.id}, sn={self.sn}, departament={self.departament}'
+
 
 class History(Base):
     __tablename__ = 'history'
@@ -84,3 +87,6 @@ class History(Base):
                           sa.ForeignKey('users.id'),
                           index=True)
     author = orm.relationship('User', back_populates="histories")
+
+    def __repr__(self):
+        return f'history id {self.id}, desc: {self.description}'

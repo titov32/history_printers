@@ -6,7 +6,8 @@ from hp import schemas
 from hp.db import get_db
 
 hp_api_router = APIRouter(
-    prefix='/API'
+    prefix='/API',
+    tags=['API']
 )
 
 
