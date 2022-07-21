@@ -2,6 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from datetime import datetime
 
+from sqlalchemy.orm.strategy_options import joinedload
+
 from hp import models
 from hp import schemas
 from qr.utils import make_qr_code_by_path
@@ -128,6 +130,12 @@ async def get_printer_by_sn(db: AsyncSession, sn: str):
     return gotten_printer.first()
 
 
+async def get_all_printers(db: AsyncSession):
+    statement = select(models.Printer)
+    gotten_printer = await db.execute(statement)
+    return gotten_printer.scalars().all()
+
+
 async def get_printer_not_work(db: AsyncSession):
     statement = select(models.Printer).where(models.Printer.is_work == False)
     report = await db.execute(statement)
@@ -149,9 +157,12 @@ async def get_printer_by_id_with_history(db: AsyncSession, id: int):
     history = select(models.History)\
                 .where(models.History.printer_id==id) \
                 .order_by(models.History.date.desc())
-    hist_response = await db.execute(history)
+    hist_response = (await db.execute(history)).scalars().all()
+    prn = [printers]
+    prn = printers.all() #+ hist_response.scalars().all()
 
-    return printers.all()+hist_response.scalars().all()
+
+    return prn
 
 
 async def update_printer(db: AsyncSession, printer: schemas.Printer):
