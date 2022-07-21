@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Form
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import RedirectResponse
+
 from hp import crud
 from hp import schemas
 from hp.db import get_db
@@ -96,10 +98,7 @@ async def create_printer(request: Request,
 async def get_printer_with_history(request: Request, id: int,
                                    db: AsyncSession = Depends(get_db)):
     printer = await crud.delete_printer(db, id)
-    printers = await crud.get_all_printers(db)
-    return templates.TemplateResponse("printers.html",
-                                      {"request": request,
-                                       "printers": printers})
+    return RedirectResponse("/printers")
 
 
 @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
