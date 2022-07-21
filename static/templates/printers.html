@@ -4,12 +4,13 @@
 
 
 {% block content %}
-
+<p> {{printers}} </p>
 
 <table class="table table-striped table-white">
     <thead class="thead-white">
 
     <tr>
+        <th scope="col"> <b> Марка </b> </th>
         <th scope="col"> <b> Модель</b> </th>
         <th scope="col"> <b>Отдел</b> </th>
         <th scope="col"><b>IP</b> </th>
@@ -22,14 +23,15 @@
     <tbody>
     {% for printer in printers %}
     <tr>
-         <td> {{printer.model_id}} </td>
-         <td> {{printer.departament}} </td>
-         <td> {{printer.ip}} </td>
-         <td><a href="/printer/{{printer.id}}"> {{printer.sn}}</a>  </td>
-         <td> {{printer.is_work}} </td>
-        <td> {{printer.is_free}} </td>
-        <td> {{printer.repairing}} </td>
-        <td> <img src={{printer.qr}} width="100" height="100"
+         <td> {{printer[1].brand}} </td>
+         <td> {{printer[1].model}} </td>
+         <td> {{printer[0].departament}} </td>
+         <td> {{printer[0].ip}} </td>
+         <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
+         <td> {{printer[0].is_work}} </td>
+        <td> {{printer[0].is_free}} </td>
+        <td> {{printer[0].repairing}} </td>
+        <td> <img src={{printer[0].qr}} width="100" height="100"
      alt="QR"> </td>
          <td> <a class="pressed-button"
                  href="/erase_printer/{{printer.id}}"

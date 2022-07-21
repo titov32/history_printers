@@ -4,7 +4,7 @@
 
 
 {% block content %}
-
+{{printers}}
 <div>
   <h3>Информация по модели</h3>
   <p> Марка принтера: {{printers[0][0].brand}}</p>
@@ -51,7 +51,7 @@
 
   <div class="col-md-3">
       <label for="description" class="form-label">description </label>
-      <input type="text" class="form-control" name="description" id="description" value="abcd1234" >
+      <input type="text" class="form-control" name="description" id="description" value="Замечания по принтеру" >
   </div>
 
 

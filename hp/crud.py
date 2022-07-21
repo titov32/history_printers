@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from datetime import datetime
@@ -111,6 +112,9 @@ async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
     db.add(db_printer)
     try:
         await db.commit()
+    except IntegrityError:
+        pass
+        # TODO нужно обработать ошибку возникающую из-за серийника или id модели
     except Exception as e:
         print(f'Error!!! {e}')
         await db.rollback()
@@ -132,15 +136,28 @@ async def get_printer_by_sn(db: AsyncSession, sn: str):
 
 
 async def get_all_printers(db: AsyncSession):
-    statement = select(models.Printer)
+    statement = select(models.Printer, models.ModelPrinter) \
+                .join(models.ModelPrinter)
     gotten_printer = await db.execute(statement)
-    return gotten_printer.scalars().all()
+    return gotten_printer.all()
 
 
-async def get_printer_not_work(db: AsyncSession):
+async def get_report_printer_not_work(db: AsyncSession):
     statement = select(models.Printer).where(models.Printer.is_work == False)
     report = await db.execute(statement)
-    return report.all()
+    return report.scalars().all()
+
+
+async def get_report_printer_in_repair(db: AsyncSession):
+    statement = select(models.Printer).where(models.Printer.repairing == True)
+    report = await db.execute(statement)
+    return report.scalars().all()
+
+
+async def get_report_printer_free(db: AsyncSession):
+    statement = select(models.Printer).where(models.Printer.is_free == False)
+    report = await db.execute(statement)
+    return report.scalars().all()
 
 
 async def get_printer_by_id(db: AsyncSession, id: int):

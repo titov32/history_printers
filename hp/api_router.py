@@ -128,7 +128,7 @@ async def read_printer(printer_id: int, db: AsyncSession = Depends(get_db)):
 
 @hp_api_router.get("/printer/not_work")
 async def get_not_work_printer(db: AsyncSession = Depends(get_db)):
-    printers = await crud.get_printer_not_work(db)
+    printers = await crud.get_report_printer_not_work(db)
     return printers
 
 

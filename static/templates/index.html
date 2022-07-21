@@ -11,6 +11,26 @@
 
 <h2> Отображение статистики </h2>
 
+<h3> Не рабочие принтеры</h3>
+
+{% for printer in report_dont_work_printers %}
+    <p> {{printer}}</p>
+{% endfor %}
+
+
+<h3> Принтеры находящиеся в ремонте </h3>
+
+{% for printer in report_repairing_printers %}
+    <p> {{printer}}</p>
+{% endfor %}
+
+
+<h3> Свободные принтеры готовые к использованию </h3>
+
+{% for printer in get_report_printer_free %}
+    <p> {{printer}}</p>
+{% endfor %}
+
 
 
 {% endblock %}

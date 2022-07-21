@@ -8,6 +8,8 @@ from hp import schemas
 from hp.db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from asyncpg.exceptions import ForeignKeyViolationError
+from sqlalchemy.exc import IntegrityError
 
 hp_html_router = APIRouter(
     prefix='',
@@ -18,10 +20,17 @@ templates = Jinja2Templates(directory="static/templates")
 
 
 @hp_html_router.get("/", response_class=HTMLResponse)
-async def welkome(request: Request,
+async def welcome(request: Request,
                   db: AsyncSession = Depends(get_db)):
-    return templates.TemplateResponse("index.html",
-                                      {"request": request, })
+    report_dont_work_printers = await crud.get_report_printer_not_work(db)
+    report_repairing_printers = await crud.get_report_printer_in_repair(db)
+    report_free_printers = await crud.get_report_printer_free(db)
+    context = {"request": request,
+               'report_dont_work_printers': report_dont_work_printers,
+               'report_repairing_printers': report_repairing_printers,
+               'report_free_printers': report_free_printers
+               }
+    return templates.TemplateResponse("index.html", context)
 
 
 @hp_html_router.get("/models_printer", response_class=HTMLResponse)
@@ -48,6 +57,13 @@ async def create_model_printer(request: Request,
     models = await crud.read_model_printers(db)
     return templates.TemplateResponse("models_printer.html",
                                       {"request": request, "models": models})
+
+
+@hp_html_router.get("/erase_model/{id}", response_class=HTMLResponse)
+async def get_printer_with_history(request: Request, id: int,
+                                   db: AsyncSession = Depends(get_db)):
+    printer = await crud.delete_model_printer(db, id)
+    return RedirectResponse("/models_printer")
 
 
 @hp_html_router.get("/printer/{id}", response_class=HTMLResponse)
@@ -87,7 +103,14 @@ async def create_printer(request: Request,
                                     is_free=is_free,
                                     repairing=repairing
                                     )
-    await crud.create_printer(db, printer=printer)
+    try:
+        await crud.create_printer(db, printer=printer)
+    except ForeignKeyViolationError:
+        print('ERROR!!!')
+        # TODO нужно обработать исключение, к примеру перевести на форму и создать новую модель
+
+    except Exception as e:
+        print(f'Не обработанная ошибка {e}')
     printers = await crud.get_all_printers(db)
     return templates.TemplateResponse("printers.html",
                                       {"request": request,
@@ -105,7 +128,6 @@ async def get_printer_with_history(request: Request, id: int,
 async def create_record_for_printer(request: Request, id_: int,
                                     description=Form(),
                                     db: AsyncSession = Depends(get_db)):
-
     record = schemas.HistoryBase(description=description, printer_id=id_)
     user_id = 1
     print(description)
