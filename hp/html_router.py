@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request, Form
+from typing import Union, List
+
+from fastapi import APIRouter, Request, Form, UploadFile, File
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
@@ -10,6 +12,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from asyncpg.exceptions import ForeignKeyViolationError
 from sqlalchemy.exc import IntegrityError
+
 
 hp_html_router = APIRouter(
     prefix='',
@@ -127,10 +130,25 @@ async def get_printer_with_history(request: Request, id: int,
 @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
 async def create_record_for_printer(request: Request, id_: int,
                                     description=Form(),
+                                    files: List[UploadFile] = File(description="Multiple files as UploadFile"),
                                     db: AsyncSession = Depends(get_db)):
-    record = schemas.HistoryBase(description=description, printer_id=id_)
+
     user_id = 1
-    print(description)
+
+    if not files[0].filename:
+        print(f'No upload file sent')
+        path_file = None
+    else:
+        print('____________________________')
+        print(files[0].filename)
+        files = [file for file in files]
+        path_file = ''
+        for file in files:
+            file_location = f"static/img/{file.filename}"
+            path_file+=file_location
+            with open(file_location, "wb+") as file_object:
+                file_object.write(file.file.read())
+    record = schemas.HistoryBase(description=description, printer_id=id_, path_file = path_file)
     await crud.create_history_printer(db, user_id, record)
     printer = await crud.get_printer_by_id_with_history(db, id_)
 

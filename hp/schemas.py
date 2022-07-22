@@ -85,6 +85,7 @@ class PrinterCreate(PrinterBase):
 class HistoryBase(BaseModel):
     printer_id: int
     description: str
+    path_file: Optional[str] = None
 
 
 class History(HistoryBase):

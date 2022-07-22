@@ -18,8 +18,8 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column(
-        'printer',
-        sa.Column('qr', sa.String), ),
+        'history',
+        sa.Column('path_file', sa.String), ),
 
 
 

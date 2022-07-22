@@ -83,6 +83,7 @@ class History(Base):
     printer = orm.relationship('Printer', back_populates='histories')
     date = sa.Column(sa.DateTime)
     description = sa.Column(sa.Text)
+    path_file = sa.Column(sa.String)
     author_id = sa.Column(sa.Integer,
                           sa.ForeignKey('users.id'),
                           index=True)

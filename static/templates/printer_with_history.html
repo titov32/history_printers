@@ -4,7 +4,6 @@
 
 
 {% block content %}
-{{printers}}
 <div>
   <h3>Информация по модели</h3>
   <p> Марка принтера: {{printers[0][0].brand}}</p>
@@ -37,23 +36,32 @@
     </h2>
     <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
       <div class="accordion-body">
-        <strong>{{record[1].email}}.</strong> {{record[0].description}}
+        <strong>{{record[1].email}}.</strong>
+        {{record[0].description}}
+        {% if record[0].path_file %}
+        <img src="/{{record[0].path_file}}"   width="320" height="600"  alt="фото">
+        {% endif %}
       </div>
+
     </div>
   </div>
   {% endfor %}
+
 </div>
 
 
 
 <h3>Добавление информации по принтеру</h3>
-<form class="row g-3" method="post">
+<form class="row g-3" action="/printer/{{printers[0][1].id}}" enctype="multipart/form-data" method="post">
 
   <div class="col-md-3">
       <label for="description" class="form-label">description </label>
       <input type="text" class="form-control" name="description" id="description" value="Замечания по принтеру" >
   </div>
-
+  <div class="mb-3">
+    <label for="formFile" class="form-label">Default file input example</label>
+    <input class="form-control" type="file" multiple id="formFile" name="files">
+  </div>
 
     <div class="col-12">
         <button class="btn btn-primary" type="submit">Добавить</button>
