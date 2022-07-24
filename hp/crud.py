@@ -112,9 +112,6 @@ async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
     db.add(db_printer)
     try:
         await db.commit()
-    except IntegrityError:
-        pass
-        # TODO нужно обработать ошибку возникающую из-за серийника или id модели
     except Exception as e:
         print(f'Error!!! {e}')
         await db.rollback()

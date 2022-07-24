@@ -106,6 +106,14 @@ async def create_printer(request: Request,
                                     is_free=is_free,
                                     repairing=repairing
                                     )
+    # TODO нужно проверить серийник на уникальность и \
+    # выбор модели при неверном наборе ввывести нужную старницу
+    if await crud.get_printer_by_sn(db, sn):
+        raise HTTPException(status_code=400, detail='Дубликат sn')
+
+    if not await crud.get_model_printer_by_id(db, id_=int(model_id)):
+        raise HTTPException(status_code=400, detail='неверное указана модель')
+
     try:
         await crud.create_printer(db, printer=printer)
     except ForeignKeyViolationError:
