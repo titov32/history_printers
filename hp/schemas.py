@@ -82,6 +82,9 @@ class PrinterCreate(PrinterBase):
     pass
 
 
+class PrinterUpdate(PrinterBase):
+    id: int
+
 class HistoryBase(BaseModel):
     printer_id: int
     description: str

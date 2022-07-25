@@ -216,3 +216,22 @@ async def create_history_printer( db: AsyncSession, user_id, history: schemas.Hi
     await db.commit()
     await db.refresh(db_history)
     return db_history
+
+
+async def update_printer_with_history(db: AsyncSession,
+                                      printer: schemas.PrinterUpdate,
+                                      description: schemas.HistoryBase,
+                                      user_id):
+    printer.ip = printer.ip.ip.exploded
+    db_history = models.History(**description.dict(), author_id=user_id,
+                                date=datetime.now())
+
+    statement = update(models.Printer) \
+        .where(models.Printer.id == printer.id) \
+        .values(printer.dict())
+    await db.execute(statement)
+    db.add(db_history)
+    await db.commit()
+    await db.refresh(db_history)
+
+    return printer
