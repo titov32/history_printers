@@ -13,7 +13,6 @@ from fastapi.responses import HTMLResponse
 from asyncpg.exceptions import ForeignKeyViolationError
 from sqlalchemy.exc import IntegrityError
 
-
 hp_html_router = APIRouter(
     prefix='',
     tags=['html'],
@@ -44,7 +43,7 @@ async def get_all_models_printer(request: Request,
 
     return templates.TemplateResponse("models_printer.html",
                                       {"request": request, "models": models,
-                                       "models_printer_active":"active"})
+                                       "models_printer_active": "active"})
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
@@ -79,7 +78,7 @@ async def get_printer_with_history(request: Request, id: int,
     return templates.TemplateResponse("printer_with_history.html",
                                       {"request": request,
                                        "printers": printer,
-                                       "printer_active":"active"})
+                                       "printer_active": "active"})
 
 
 @hp_html_router.get("/printers", response_class=HTMLResponse)
@@ -104,7 +103,7 @@ async def get_all_printers(request: Request, model_id: int,
 
 
 @hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
-async def create_printer(request: Request, model_id:int,
+async def create_printer(request: Request, model_id: int,
                          departament=Form(),
                          ip=Form(),
                          sn=Form(),
@@ -146,9 +145,9 @@ async def get_printer_with_history(request: Request, id: int,
 @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
 async def create_record_for_printer(request: Request, id_: int,
                                     description=Form(),
-                                    files: List[UploadFile] = File(description="Multiple files as UploadFile"),
+                                    files: List[UploadFile] = File(
+                                        description="Multiple files as UploadFile"),
                                     db: AsyncSession = Depends(get_db)):
-
     user_id = 1
 
     if not files[0].filename:
@@ -161,10 +160,12 @@ async def create_record_for_printer(request: Request, id_: int,
         path_file = ''
         for file in files:
             file_location = f"static/img/{file.filename}"
-            path_file+=file_location
+            path_file += file_location
             with open(file_location, "wb+") as file_object:
                 file_object.write(file.file.read())
-    record = schemas.HistoryBase(description=description, printer_id=id_, path_file = path_file)
+    record = schemas.HistoryBase(description=description,
+                                 printer_id=id_,
+                                 path_file=path_file)
     await crud.create_history_printer(db, user_id, record)
     printer = await crud.get_printer_by_id_with_history(db, id_)
 
@@ -174,16 +175,27 @@ async def create_record_for_printer(request: Request, id_: int,
 
 
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
-async def create_record_for_printer(request: Request, id_: int,
-
-
-                                    db: AsyncSession = Depends(get_db)):
-
+async def get_form_for_update_printer(request: Request, id_: int,
+                                      db: AsyncSession = Depends(get_db)):
     user_id = 1
     printer = await crud.get_printer_by_id(db, id_)
-
-
-
     return templates.TemplateResponse("update_printer.html",
                                       {"request": request,
                                        "printer": printer[0]})
+
+
+@hp_html_router.post("/update_printer/{id_}", response_class=HTMLResponse)
+async def update_printer(request: Request, id_: int,
+                         db: AsyncSession = Depends(get_db)):
+
+
+    record = schemas.HistoryBase(description=description,
+                                 printer_id=id_,
+                                 path_file=path_file)
+    await crud.create_history_printer(db, user_id, record)
+    printer = await crud.get_printer_by_id_with_history(db, id_)
+
+    return templates.TemplateResponse("printer_with_history.html",
+                                      {"request": request,
+                                       "printers": printer})
+    # TODO нужно реализовать обновление принтера, с обновлением информации в его истории
