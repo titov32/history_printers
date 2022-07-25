@@ -64,8 +64,8 @@ async def create_model_printer(request: Request,
 
 
 @hp_html_router.get("/erase_model/{id}", response_class=HTMLResponse)
-async def get_printer_with_history(request: Request, id: int,
-                                   db: AsyncSession = Depends(get_db)):
+async def delete_printer(request: Request, id: int,
+                         db: AsyncSession = Depends(get_db)):
     printer = await crud.delete_model_printer(db, id)
     return RedirectResponse("/models_printer")
 
@@ -74,32 +74,32 @@ async def get_printer_with_history(request: Request, id: int,
 async def get_printer_with_history(request: Request, id: int,
                                    db: AsyncSession = Depends(get_db)):
     printer = await crud.get_printer_by_id_with_history(db, id)
-
-    return templates.TemplateResponse("printer_with_history.html",
-                                      {"request": request,
-                                       "printers": printer,
-                                       "printer_active": "active"})
+    context = {"request": request,
+               "printers": printer,
+               "printer_active": "active"}
+    return templates.TemplateResponse("printer_with_history.html", context)
 
 
 @hp_html_router.get("/printers", response_class=HTMLResponse)
 async def get_all_printers(request: Request,
                            db: AsyncSession = Depends(get_db)):
     printers = await crud.get_all_printers(db)
-    return templates.TemplateResponse("printers.html",
-                                      {"request": request,
-                                       "printers": printers,
-                                       "printer_active": "active"})
+    context = {"request": request,
+               "printers": printers,
+               "printer_active": "active"}
+    return templates.TemplateResponse("printers.html", context)
 
 
 @hp_html_router.get("/printers/{model_id}", response_class=HTMLResponse)
-async def get_all_printers(request: Request, model_id: int,
-                           db: AsyncSession = Depends(get_db)):
+async def get_all_printers_by_model(request: Request, model_id: int,
+                                    db: AsyncSession = Depends(get_db)):
     printers = await crud.get_printers_by_model_id(db, model_id=model_id)
-    return templates.TemplateResponse("printers_model_id.html",
-                                      {"request": request,
-                                       "printers": printers,
-                                       "model_id": model_id,
-                                       "printer_active": "active"})
+    context = {"request": request,
+               "printers": printers,
+               "model_id": model_id,
+               "printer_active": "active"}
+    return templates.TemplateResponse("printers_model_id.html", context
+                                      )
 
 
 @hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
@@ -148,14 +148,11 @@ async def create_record_for_printer(request: Request, id_: int,
                                     files: List[UploadFile] = File(
                                         description="Multiple files as UploadFile"),
                                     db: AsyncSession = Depends(get_db)):
+    # TODO Нужно заменить user_id
     user_id = 1
-
     if not files[0].filename:
-        print(f'No upload file sent')
         path_file = None
     else:
-        print('____________________________')
-        print(files[0].filename)
         files = [file for file in files]
         path_file = ''
         for file in files:
@@ -168,10 +165,10 @@ async def create_record_for_printer(request: Request, id_: int,
                                  path_file=path_file)
     await crud.create_history_printer(db, user_id, record)
     printer = await crud.get_printer_by_id_with_history(db, id_)
+    context = {"request": request,
+               "printers": printer}
 
-    return templates.TemplateResponse("printer_with_history.html",
-                                      {"request": request,
-                                       "printers": printer})
+    return templates.TemplateResponse("printer_with_history.html", context)
 
 
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
@@ -186,13 +183,56 @@ async def get_form_for_update_printer(request: Request, id_: int,
 
 @hp_html_router.post("/update_printer/{id_}", response_class=HTMLResponse)
 async def update_printer(request: Request, id_: int,
-                         db: AsyncSession = Depends(get_db)):
+                         db: AsyncSession = Depends(get_db),
+                         departament=Form(),
+                         ip=Form(),
+                         sn=Form(),
+                         is_work=Form(),
+                         is_free=Form(),
+                         repairing=Form(),
+                         description=Form(),
+                         model_id=Form(),
+                         ):
+    user_id = 1
 
+    printer_old = (await crud.get_printer_by_id(db, id_))[0]
 
-    record = schemas.HistoryBase(description=description,
-                                 printer_id=id_,
-                                 path_file=path_file)
-    await crud.create_history_printer(db, user_id, record)
+    printer_new = schemas.PrinterUpdate(departament=departament,
+                                        ip=ip,
+                                        sn=sn,
+                                        is_work=is_work,
+                                        is_free=is_free,
+                                        repairing=repairing,
+                                        model_id=model_id,
+                                        id=id_, )
+    print('!!!'*30)
+    print(printer_new)
+    print(f'is work: {is_work} is free:{is_free}, reparing: {repairing}')
+    # TODO нужно отладить работу
+    notice = ''
+    if printer_new.departament != printer_old.departament:
+        notice += f'Принтер перехал из {printer_old.departament} в {printer_new.departament}'
+    if printer_new.ip.ip.exploded != printer_old.ip:
+        notice += f'Принтер сменил IP адрес на {printer_new.ip}'
+    if printer_new.is_work != printer_old.is_work:
+        if printer_old.is_work:
+            notice += f'Принтер перестал работать'
+        else:
+            notice += f'Принтер заработал'
+    if printer_new.is_free != printer_old.is_free:
+        if printer_old.is_free:
+            notice += f'Принтер стал использоваться'
+        else:
+            notice += f'Принтер освободился'
+    if printer_new.repairing != printer_old.repairing:
+        if printer_old.repairing:
+            notice += f'Принтер отремонтирован'
+        else:
+            notice += f'Принтер уехал в ремонт'
+
+    record = schemas.HistoryBase(description=notice,
+                                 printer_id=id_)
+    await crud.update_printer_with_history(db, printer_new, record ,user_id)
     printer = await crud.get_printer_by_id_with_history(db, id_)
 
     return templates.TemplateResponse("printer_with_history.html",
