@@ -31,7 +31,8 @@ async def welcome(request: Request,
     context = {"request": request,
                'report_dont_work_printers': report_dont_work_printers,
                'report_repairing_printers': report_repairing_printers,
-               'report_free_printers': report_free_printers
+               'report_free_printers': report_free_printers,
+               'main_active': 'active'
                }
     return templates.TemplateResponse("index.html", context)
 
@@ -42,7 +43,8 @@ async def get_all_models_printer(request: Request,
     models = await crud.read_model_printers(db)
 
     return templates.TemplateResponse("models_printer.html",
-                                      {"request": request, "models": models})
+                                      {"request": request, "models": models,
+                                       "models_printer_active":"active"})
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
@@ -76,7 +78,8 @@ async def get_printer_with_history(request: Request, id: int,
 
     return templates.TemplateResponse("printer_with_history.html",
                                       {"request": request,
-                                       "printers": printer})
+                                       "printers": printer,
+                                       "printer_active":"active"})
 
 
 @hp_html_router.get("/printers", response_class=HTMLResponse)
@@ -85,12 +88,23 @@ async def get_all_printers(request: Request,
     printers = await crud.get_all_printers(db)
     return templates.TemplateResponse("printers.html",
                                       {"request": request,
-                                       "printers": printers})
+                                       "printers": printers,
+                                       "printer_active": "active"})
 
 
-@hp_html_router.post("/printers", response_class=HTMLResponse)
-async def create_printer(request: Request,
-                         model_id=Form(),
+@hp_html_router.get("/printers/{model_id}", response_class=HTMLResponse)
+async def get_all_printers(request: Request, model_id: int,
+                           db: AsyncSession = Depends(get_db)):
+    printers = await crud.get_printers_by_model_id(db, model_id=model_id)
+    return templates.TemplateResponse("printers_model_id.html",
+                                      {"request": request,
+                                       "printers": printers,
+                                       "model_id": model_id,
+                                       "printer_active": "active"})
+
+
+@hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
+async def create_printer(request: Request, model_id:int,
                          departament=Form(),
                          ip=Form(),
                          sn=Form(),
@@ -106,8 +120,6 @@ async def create_printer(request: Request,
                                     is_free=is_free,
                                     repairing=repairing
                                     )
-    # TODO нужно проверить серийник на уникальность и \
-    # выбор модели при неверном наборе ввывести нужную старницу
     if await crud.get_printer_by_sn(db, sn):
         raise HTTPException(status_code=400, detail='Дубликат sn')
 
@@ -116,14 +128,10 @@ async def create_printer(request: Request,
 
     try:
         await crud.create_printer(db, printer=printer)
-    except ForeignKeyViolationError:
-        print('ERROR!!!')
-        # TODO нужно обработать исключение, к примеру перевести на форму и создать новую модель
-
     except Exception as e:
         print(f'Не обработанная ошибка {e}')
-    printers = await crud.get_all_printers(db)
-    return templates.TemplateResponse("printers.html",
+    printers = await crud.get_printers_by_model_id(db, model_id=model_id)
+    return templates.TemplateResponse("printers_model_id.html",
                                       {"request": request,
                                        "printers": printers})
 
@@ -163,3 +171,19 @@ async def create_record_for_printer(request: Request, id_: int,
     return templates.TemplateResponse("printer_with_history.html",
                                       {"request": request,
                                        "printers": printer})
+
+
+@hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
+async def create_record_for_printer(request: Request, id_: int,
+
+
+                                    db: AsyncSession = Depends(get_db)):
+
+    user_id = 1
+    printer = await crud.get_printer_by_id(db, id_)
+
+
+
+    return templates.TemplateResponse("update_printer.html",
+                                      {"request": request,
+                                       "printer": printer[0]})

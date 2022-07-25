@@ -23,7 +23,7 @@
   {% if printers[0][1].repairing %} Принтер сейчас в ремонте
   {% endif %}
 </div>
-
+<a class="btn btn-secondary" href="/update_printer/{{printers[0][1].id}}" role="button">Обновить информацию по принтеру</a>
 <div class="accordion" id="accordionPanelsStayOpenExample">
   {% for record in printers[1:] %}
 

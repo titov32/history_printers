@@ -132,6 +132,14 @@ async def get_printer_by_sn(db: AsyncSession, sn: str):
     return gotten_printer.first()
 
 
+async def get_printers_by_model_id(db: AsyncSession, model_id: int):
+    statement = select(models.Printer, models.ModelPrinter) \
+                .join(models.ModelPrinter) \
+                .where(models.Printer.model_id == model_id)
+    gotten_printers = await db.execute(statement)
+    return gotten_printers.all()
+
+
 async def get_all_printers(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
                 .join(models.ModelPrinter)
@@ -140,21 +148,27 @@ async def get_all_printers(db: AsyncSession):
 
 
 async def get_report_printer_not_work(db: AsyncSession):
-    statement = select(models.Printer).where(models.Printer.is_work == False)
+    statement = select(models.Printer, models.ModelPrinter) \
+        .join(models.ModelPrinter) \
+        .where(models.Printer.is_work == False)
     report = await db.execute(statement)
-    return report.scalars().all()
+    return report.all()
 
 
 async def get_report_printer_in_repair(db: AsyncSession):
-    statement = select(models.Printer).where(models.Printer.repairing == True)
+    statement = select(models.Printer, models.ModelPrinter) \
+        .join(models.ModelPrinter) \
+        .where(models.Printer.repairing == True)
     report = await db.execute(statement)
-    return report.scalars().all()
+    return report.all()
 
 
 async def get_report_printer_free(db: AsyncSession):
-    statement = select(models.Printer).where(models.Printer.is_free == False)
+    statement = select(models.Printer, models.ModelPrinter) \
+        .join(models.ModelPrinter) \
+        .where(models.Printer.is_free == False)
     report = await db.execute(statement)
-    return report.scalars().all()
+    return report.all()
 
 
 async def get_printer_by_id(db: AsyncSession, id: int):

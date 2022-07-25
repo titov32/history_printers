@@ -1,0 +1,82 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+<p> {{printer[0]}}</p>
+<table class="table table-striped table-white">
+    <thead class="thead-white">
+
+    <tr>
+
+        <th scope="col"> <b>Отдел</b> </th>
+        <th scope="col"><b>IP</b> </th>
+        <th scope="col"><b>SN</b> </th>
+        <th scope="col"><b>В ходу</b> </th>
+        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>QR</b> </th>
+    </tr>
+    <tbody>
+
+    <tr>
+
+         <td> {{printer.departament}} </td>
+         <td> {{printer.ip}} </td>
+         <td><a href="/printer/{{printer.id}}"> {{printer.sn}}</a>  </td>
+         <td> {{printer.is_work}} </td>
+        <td> {{printer.is_free}} </td>
+        <td> {{printer.repairing}} </td>
+        <td> <img src={{printer.qr}} width="100" height="100"
+     alt="QR"> </td>
+         <td> {{printer.id}} </td>
+    </tr>
+
+    </tbody>
+</table>
+
+<h3>Редактирование принтера</h3>
+<form class="row g-3" method="post">
+
+  <div class="col-md-4">
+        <label for="departament" class="form-label">Отдел</label>
+        <input type="text" class="form-control" name="departament" id="departament" value="{{printer.departament}}" >
+  </div>
+
+  <div class="col-md-3">
+      <label for="ip" class="form-label">IP</label>
+     <input type="text" class="form-control" name="ip" id="ip" value="{{printer.ip}}" >
+  </div>
+  <div class="col-md-3">
+      <label for="sn" class="form-label">Серийный номер</label>
+      <input type="text" class="form-control" name="sn" id="sn" value="{{printer.sn}}" >
+  </div>
+  <div class="col-md-3">
+        <label for="is_work" class="form-label">В работе</label>
+        <select class="form-select" name="is_work" id="is_work" >
+          <option selected value="{{printer.is_work}}"> true</option>
+          <option>false</option>
+        </select>
+  </div>
+    <div class="col-md-3">
+        <label for="is_free" class="form-label">Свободен</label>
+        <select class="form-select" name="is_free" id="is_free" >
+          <option selected value="{{printer.is_free}}">false</option>
+          <option>true</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="repairing" class="form-label">В ремонте</label>
+        <select class="form-select" name="repairing" id="repairing" >
+              <option selected value="{{printer.repairing}}">true</option>
+              <option>false</option>
+        </select>
+    </div>
+    <div class="col-12">
+    <button class="btn btn-primary" type="submit">Обновить информацию принтера</button>
+  </div>
+</form>
+
+
+{% endblock %}
