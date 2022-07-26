@@ -68,7 +68,7 @@ class PrinterBase(BaseModel):
     is_work: Optional[bool] = True
     is_free: Optional[bool] = False
     repairing: Optional[bool] = False
-
+    location: Optional[str] = None
 
 class Printer(PrinterBase):
     id: int
@@ -89,6 +89,7 @@ class HistoryBase(BaseModel):
     printer_id: int
     description: str
     path_file: Optional[str] = None
+
 
 
 class History(HistoryBase):

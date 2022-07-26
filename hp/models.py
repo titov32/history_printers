@@ -65,6 +65,7 @@ class Printer(Base):
     is_free = sa.Column(sa.Boolean, default=False)
     repairing = sa.Column(sa.Boolean, default=True)
     qr = sa.Column(sa.String)
+    location = sa.Column(sa.String)
     histories = orm.relationship('History',
                                  back_populates='printer',
                                  cascade="all, delete",

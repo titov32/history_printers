@@ -13,6 +13,7 @@
         <th scope="col"> <b> Марка </b> </th>
         <th scope="col"> <b> Модель</b> </th>
         <th scope="col"> <b>Отдел</b> </th>
+        <th scope="col"> <b>Локация</b> </th>
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
         <th scope="col"><b>В ходу</b> </th>
@@ -26,6 +27,7 @@
          <td> {{printer[1].brand}} </td>
          <td> {{printer[1].model}} </td>
          <td> {{printer[0].departament}} </td>
+        <td> {{printer[0].location}} </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
          <td> {{printer[0].is_work}} </td>
@@ -48,6 +50,10 @@
         <label for="departament" class="form-label">Отдел</label>
         <input type="text" class="form-control" name="departament" id="departament" value="Тех комплекс" >
   </div>
+      <div class="col-md-4">
+        <label for="location" class="form-label">Локация</label>
+        <input type="text" class="form-control" name="location" id="location" value="склад" >
+      </div>
 
   <div class="col-md-3">
       <label for="ip" class="form-label">IP</label>

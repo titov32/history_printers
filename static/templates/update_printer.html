@@ -55,29 +55,38 @@
       <label for="sn" class="form-label">Серийный номер</label>
       <input type="text" class="form-control" name="sn" id="sn" value="{{printer.sn}}" >
   </div>
+      <div class="col-md-2">
+      <label for="location" class="form-label">Локация</label>
+      <input type="text" class="form-control" name="location" id="location" value="{{printer.sn}}" >
+  </div>
     <div class="col-md-1">
-        <label for="model_id" class="form-label">модель id/label>
+        <label for="model_id" class="form-label">модель id</label>
         <input type="text" class="form-control" name="model_id" id="model_id" value="{{printer.model_id}}" >
     </div>
   <div class="col-md-2">
         <label for="is_work" class="form-label">В работе</label>
         <select class="form-select" name="is_work" id="is_work" >
-          <option selected value="{{printer.is_work}}"> true</option>
-          <option>false</option>
+          <option selected > True</option>
+          <option>False</option>
         </select>
   </div>
     <div class="col-md-2">
         <label for="is_free" class="form-label">Свободен</label>
         <select class="form-select" name="is_free" id="is_free" >
-          <option selected value="{{printer.is_free}}">false</option>
-          <option>true</option>
+            {% if printer.is_free %}
+          <option selected >True</option>
+          <option>False</option>
+            {% else %}
+             <option selected >False</option>
+          <option>True</option>
+            {%endif %}
         </select>
     </div>
     <div class="col-md-2">
         <label for="repairing" class="form-label">В ремонте</label>
         <select class="form-select" name="repairing" id="repairing" >
-              <option selected value="{{printer.repairing}}">true</option>
-              <option>false</option>
+              <option selected >True</option>
+              <option>False</option>
         </select>
 
     </div>

@@ -193,6 +193,7 @@ async def get_printer_by_id_with_history(db: AsyncSession, id: int):
 
 
 async def update_printer(db: AsyncSession, printer: schemas.Printer):
+    printer.ip = printer.ip.ip.exploded
     statement = update(models.Printer) \
         .where(models.Printer.id == printer.id) \
         .values(printer.dict())

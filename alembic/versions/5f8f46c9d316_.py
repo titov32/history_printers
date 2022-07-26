@@ -24,4 +24,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_column('printer', 'qr')
+    op.drop_column('history', 'path_file')
