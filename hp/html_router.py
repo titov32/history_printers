@@ -188,65 +188,60 @@ async def update_printer(request: Request, id_: int,
                          db: AsyncSession = Depends(get_db),
                          departament=Form(),
                          ip=Form(),
-                         sn=Form(),
                          is_work=Form(),
                          is_free=Form(),
                          repairing=Form(),
                          description=Form(),
-                         model_id=Form(),
                          location=Form()
                          ):
     user_id = 1
-
-    # prn = (await crud.get_printer_by_id(db, id_))[0]
-    # printer_old = schemas.PrinterUpdate(departament=prn.departament,
-    #                                     ip=prn.ip,
-    #                                     sn=prn.sn,
-    #                                     is_work=prn.is_work,
-    #                                     is_free=prn.is_free,
-    #                                     repairing=prn.repairing,
-    #                                     model_id=prn.model_id,
-    #                                     id=prn.id,
-    #                                     location=prn.location,)
+    prn = await crud.get_printer_by_id(db, id_)
+    prn = prn[0]
+    printer_old = schemas.PrinterUpdate(departament=prn.departament,
+                                        ip=prn.ip,
+                                        sn=prn.sn,
+                                        is_work=prn.is_work,
+                                        is_free=prn.is_free,
+                                        repairing=prn.repairing,
+                                        model_id=prn.model_id,
+                                        id=prn.id,
+                                        location=prn.location,)
     printer_new = schemas.PrinterUpdate(departament=departament,
                                         ip=ip,
-                                        sn=sn,
+                                        sn=prn.sn,
                                         is_work=is_work,
                                         is_free=is_free,
                                         repairing=repairing,
-                                        model_id=model_id,
+                                        model_id=prn.model_id,
                                         id=id_,
                                         location=location)
-    print('!!!'*30)
-    print(printer_new)
-    print(f'is work: {is_work} is free:{is_free}, reparing: {repairing}')
-    # TODO нужно отладить работу
+        # TODO нужно отладить работу
     notice = ''
-    # if printer_new.departament != printer_old.departament:
-    #     notice += f'Принтер перехал из {printer_old.departament} в {printer_new.departament}'
-    # if printer_new.ip.ip.exploded != printer_old.ip:
-    #     notice += f'Принтер сменил IP адрес на {printer_new.ip}'
-    # if printer_new.is_work != printer_old.is_work:
-    #     if printer_old.is_work:
-    #         notice += f'Принтер перестал работать'
-    #     else:
-    #         notice += f'Принтер заработал'
-    # if printer_new.is_free != printer_old.is_free:
-    #     if printer_old.is_free:
-    #         notice += f'Принтер стал использоваться'
-    #     else:
-    #         notice += f'Принтер освободился'
-    # if printer_new.repairing != printer_old.repairing:
-    #     if printer_old.repairing:
-    #         notice += f'Принтер отремонтирован'
-    #     else:
-    #         notice += f'Принтер уехал в ремонт'
+    if printer_new.departament != printer_old.departament:
+        notice += f'Принтер перехал из {printer_old.departament} в {printer_new.departament}'
+    if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded :
+        notice += f'Принтер сменил IP адрес на {printer_new.ip}'
+    if printer_new.is_work != printer_old.is_work:
+        if printer_old.is_work:
+            notice += f'Принтер перестал работать'
+        else:
+            notice += f'Принтер заработал'
+    if printer_new.is_free != printer_old.is_free:
+        if printer_old.is_free:
+            notice += f'Принтер стал использоваться'
+        else:
+            notice += f'Принтер освободился'
+    if printer_new.repairing != printer_old.repairing:
+        if printer_old.repairing:
+            notice += f'Принтер отремонтирован'
+        else:
+            notice += f'Принтер уехал в ремонт'
 
-    record = schemas.HistoryBase(description=description,
+    record = schemas.HistoryBase(description=notice,
                                  printer_id=id_)
-    await crud.update_printer(db, printer_new)
-    await crud.create_history_printer(db, user_id, record)
-    #printer = await crud.get_printer_by_id_with_history(db, id_)
+    # await crud.update_printer(db, printer_new)
+    # await crud.create_history_printer(db, user_id, record)
+    await crud.update_printer_with_history(db, printer_new, record, user_id)
 
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
     # TODO нужно реализовать обновление принтера, с обновлением информации в его истории
