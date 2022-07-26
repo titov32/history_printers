@@ -215,12 +215,13 @@ async def update_printer(request: Request, id_: int,
                                         model_id=prn.model_id,
                                         id=id_,
                                         location=location)
-        # TODO нужно отладить работу
     notice = ''
     if printer_new.departament != printer_old.departament:
         notice += f'Принтер перехал из {printer_old.departament} в {printer_new.departament}'
     if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded :
         notice += f'Принтер сменил IP адрес на {printer_new.ip}'
+    if printer_new.location != printer_old.location:
+        notice += f'Принтер перехал из {printer_old.location} в {printer_new.location}'
     if printer_new.is_work != printer_old.is_work:
         if printer_old.is_work:
             notice += f'Принтер перестал работать'
@@ -237,11 +238,11 @@ async def update_printer(request: Request, id_: int,
         else:
             notice += f'Принтер уехал в ремонт'
 
+
+    notice = f'{description} {notice}'
     record = schemas.HistoryBase(description=notice,
                                  printer_id=id_)
-    # await crud.update_printer(db, printer_new)
-    # await crud.create_history_printer(db, user_id, record)
     await crud.update_printer_with_history(db, printer_new, record, user_id)
 
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
-    # TODO нужно реализовать обновление принтера, с обновлением информации в его истории
+
