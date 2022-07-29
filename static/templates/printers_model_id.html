@@ -13,11 +13,11 @@
         <th scope="col"> <b> Марка </b> </th>
         <th scope="col"> <b> Модель</b> </th>
         <th scope="col"> <b>Отдел</b> </th>
-        <th scope="col"> <b>Локация</b> </th>
+        <th scope="col"> <b>Местоположение / кабинет</b> </th>
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
         <th scope="col"><b>В ходу</b> </th>
-        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В резерве</b> </th>
         <th scope="col"><b>В ремонте</b> </th>
         <th scope="col"><b>QR</b> </th>
     </tr>
@@ -26,7 +26,7 @@
     <tr>
          <td> {{printer[1].brand}} </td>
          <td> {{printer[1].model}} </td>
-         <td> {{printer[0].departament}} </td>
+         <td> <a href="/printers/departament/{{printer[0].departament}}"> {{printer[0].departament}} </a> </td>
         <td> {{printer[0].location}} </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
@@ -48,11 +48,11 @@
 
   <div class="col-md-4">
         <label for="departament" class="form-label">Отдел</label>
-        <input type="text" class="form-control" name="departament" id="departament" value="Тех комплекс" >
+        <input type="text" class="form-control" name="departament" id="departament" value="" required>
   </div>
       <div class="col-md-4">
-        <label for="location" class="form-label">Локация</label>
-        <input type="text" class="form-control" name="location" id="location" value="склад" >
+        <label for="location" class="form-label">Местоположение/кабинет</label>
+        <input type="text" class="form-control" name="location" id="location" value="" required >
       </div>
 
   <div class="col-md-3">
@@ -61,7 +61,7 @@
   </div>
   <div class="col-md-3">
       <label for="sn" class="form-label">Серийный номер</label>
-      <input type="text" class="form-control" name="sn" id="sn" value="abcd1234" >
+      <input type="text" class="form-control" name="sn" id="sn" value="abcd1234" required>
   </div>
   <div class="col-md-3">
         <label for="is_work" class="form-label">В работе</label>

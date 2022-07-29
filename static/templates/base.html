@@ -11,7 +11,7 @@
 <nav class="nav nav-pills flex-column flex-sm-row">
   <a class="flex-sm-fill text-sm-center nav-link  {{main_active}}" href="/">Главная</a>
   <a class="flex-sm-fill text-sm-center nav-link {{models_printer_active}}" aria-current="page" href="/models_printer">Модели принтеров</a>
-  <a class="flex-sm-fill text-sm-center nav-link {{printer_active}}" href="/printers">Принтера</a>
+  <a class="flex-sm-fill text-sm-center nav-link {{printer_active}}" href="/printers">Принтеры</a>
   <a class="flex-sm-fill text-sm-center nav-link " href="/docs">Сваггер</a>
   <a class="flex-sm-fill text-sm-center nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
 </nav>
@@ -20,4 +20,30 @@
 {% endblock %}
 
 </body>
+<footer>
+    <div class="container px-4">
+          <div class="row gx-5">
+    <div class="col">
+     <div class="p-3 border bg-light">
+         <a href="/docs">  Сваггер </a>
+     </div>
+    </div>
+    <div class="col">
+      <div class="p-3 border bg-light">
+          <a href="/about"> О сервисе </a>
+      </div>
+    </div>
+    <div class="col">
+      <div class="p-3 border bg-light">
+          <a href="#"> Сообщить о проблеме</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+    </div>
+
+</footer>
 </html>

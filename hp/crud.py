@@ -140,6 +140,14 @@ async def get_printers_by_model_id(db: AsyncSession, model_id: int):
     return gotten_printers.all()
 
 
+async def get_printers_by_departament(db: AsyncSession, departament: str):
+    statement = select(models.Printer, models.ModelPrinter) \
+                .join(models.ModelPrinter) \
+                .where(models.Printer.departament == departament)
+    gotten_printers = await db.execute(statement)
+    return gotten_printers.all()
+
+
 async def get_all_printers(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
                 .join(models.ModelPrinter)
@@ -166,7 +174,7 @@ async def get_report_printer_in_repair(db: AsyncSession):
 async def get_report_printer_free(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
         .join(models.ModelPrinter) \
-        .where(models.Printer.is_free == False)
+        .where(models.Printer.is_free == True)
     report = await db.execute(statement)
     return report.all()
 
