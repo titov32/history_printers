@@ -14,7 +14,7 @@
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
         <th scope="col"><b>В ходу</b> </th>
-        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В резерве</b> </th>
         <th scope="col"><b>В ремонте</b> </th>
         <th scope="col"><b>QR</b> </th>
     </tr>
@@ -28,9 +28,9 @@
          <td> {{printer.is_work}} </td>
         <td> {{printer.is_free}} </td>
         <td> {{printer.repairing}} </td>
-        <td> <img src={{printer.qr}} width="100" height="100"
+        <td> <img src="/{{printer.qr}}" width="100" height="100"
      alt="QR"> </td>
-         <td> {{printer.id}} </td>
+        
     </tr>
 
     </tbody>
@@ -52,7 +52,7 @@
      <input type="text" class="form-control" name="ip" id="ip" value="{{printer.ip}}" >
   </div>
   <div class="col-md-2">
-      <label for="location" class="form-label">Локация</label>
+      <label for="location" class="form-label">Местоположение / Кабинет</label>
       <input type="text" class="form-control" name="location" id="location" value="{{printer.location}}" >
   </div>
 
@@ -69,7 +69,7 @@
         </select>
   </div>
     <div class="col-md-2">
-        <label for="is_free" class="form-label">Свободен</label>
+        <label for="is_free" class="form-label">В резерве</label>
         <select class="form-select" name="is_free" id="is_free" >
             {% if printer.is_free %}
               <option selected >True</option>

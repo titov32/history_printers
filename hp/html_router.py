@@ -33,6 +33,7 @@ async def welcome(request: Request,
                'report_free_printers': report_free_printers,
                'main_active': 'active'
                }
+    #request.url.path
     return templates.TemplateResponse("index.html", context)
 
 
@@ -102,6 +103,17 @@ async def get_all_printers_by_model(request: Request, model_id: int,
                                       )
 
 
+@hp_html_router.get("/printers/departament/{departament}", response_class=HTMLResponse)
+async def get_all_printers_by_model(request: Request, departament: str,
+                                    db: AsyncSession = Depends(get_db)):
+    printers = await crud.get_printers_by_departament(db, departament=departament)
+    context = {"request": request,
+               "printers": printers,
+               "departament": departament,
+               "printer_active": "active"}
+    return templates.TemplateResponse("printers_model_id.html", context
+                                      )
+
 @hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
 async def create_printer(request: Request, model_id: int,
                          departament=Form(),
@@ -112,6 +124,7 @@ async def create_printer(request: Request, model_id: int,
                          is_free=Form(),
                          repairing=Form(),
                          db: AsyncSession = Depends(get_db)):
+    # TODO Нужно проверить и обработать ошибку 404
     printer = schemas.PrinterCreate(model_id=model_id,
                                     departament=departament,
                                     ip=ip,
@@ -151,6 +164,7 @@ async def create_record_for_printer(request: Request, id_: int,
                                         description="Multiple files as UploadFile"),
                                     db: AsyncSession = Depends(get_db)):
     # TODO Нужно заменить user_id
+    # TODO Нужно обработать ошибку 404
     user_id = 1
     if not files[0].filename:
         path_file = None

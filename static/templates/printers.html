@@ -1,6 +1,6 @@
 
 {% extends 'base.html' %}
-{% block title%} Модели принтеров {% endblock %}
+{% block title%} Принтеры {% endblock %}
 
 
 {% block content %}
@@ -15,7 +15,7 @@
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
         <th scope="col"><b>В ходу</b> </th>
-        <th scope="col"><b>Свободен</b> </th>
+        <th scope="col"><b>В резерве</b> </th>
         <th scope="col"><b>В ремонте</b> </th>
         <th scope="col"><b>QR</b> </th>
     </tr>
@@ -24,7 +24,7 @@
     <tr>
          <td> {{printer[1].brand}} </td>
         <td> <a href="/printers/{{printer[1].id}}"> {{printer[1].model}}</a> </td>
-         <td> {{printer[0].departament}} </td>
+         <td> <a href="/printers/departament/{{printer[0].departament}}"> {{printer[0].departament}} </a>  </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
          <td> {{printer[0].is_work}} </td>
@@ -32,7 +32,7 @@
         <td> {{printer[0].repairing}} </td>
         <td> <img src={{printer[0].qr}} width="100" height="100"
      alt="QR"> </td>
-         <td> {{printer[0].id}} </td>
+         <td> <a href="/erase_printer/{{printer[0].id}}"> удалить </td>
     </tr>
      {% endfor %}
     </tbody>
