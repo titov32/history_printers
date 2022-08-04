@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    environment:
+      - POSTGRESUSER=$POSTGRESUSER
+      - POSTGRESPASS=$POSTGRESPASS
+      - POSTGRESDB=$POSTGRESDB
+    ports:
+      - "8000:8000"
