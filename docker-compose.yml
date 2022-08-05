@@ -9,3 +9,4 @@ services:
       - POSTGRESUSER=${POSTGRESUSER}
       - POSTGRESPASS=${POSTGRESPASS}
       - POSTGRESDB=${POSTGRESDB}
+    command: bash -c "alembic upgrade head"
