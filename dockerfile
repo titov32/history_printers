@@ -11,6 +11,8 @@ RUN chown -R prn:prn /code
 USER prn
 ENV POSTGRESUSER='prn'
 ENV POSTGRESPASS='password'
+ENV POSTGRESUSER='USER_DATABASE'
+ENV POSTGRESPASS='PASSWORD_DATABASE'
 ENV POSTGRESDB='prn'
 #настройки прокси
 #ENV http_proxy="http://login:password@host:port" 
