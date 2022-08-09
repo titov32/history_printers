@@ -1,0 +1,23 @@
+version: "3"
+volumes:
+    pg_selectel:
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    command: bash -c 'python init_db.py &&  uvicorn main:app --host 0.0.0.0 --port 8000'
+
+  pg_db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD='qwerty123'
+      - POSTGRES_USER=prn
+      - POSTGRES_DB=prn
+    volumes:
+      - $HOME/docker/volumes/postgres:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    
