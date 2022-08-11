@@ -25,6 +25,12 @@ association_cartridge = sa.Table(
 )
 
 
+class Departament(Base):
+    __tablename__ = 'departament'
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String, nullable=False)
+
+
 class Cartridge(Base):
     __tablename__ = 'cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
@@ -32,7 +38,36 @@ class Cartridge(Base):
     model_printers = orm.relationship('ModelPrinter',
                                       secondary=association_cartridge,
                                       back_populates='cartridges')
+
+class CounterCartidge(Base):
+    __tablename__ = 'counter_cartridge'
+    id = sa.Column(sa.Integer, primary_key=True)
+    id_cartridge = sa.Column(sa.Integer,
+                         sa.ForeignKey('cartridge.id'))
     departament = sa.Column(sa.String)
+    amount = sa.Column(sa.Integer)
+    __table_args__ = (sa.UniqueConstraint('id_cartridge', 'departament',
+                                          name='_cartridge_departament'),)
+
+class JournalInnerConsume(Base):
+    __tablename__ = 'journal_inner_consume'
+    id = sa.Column(sa.Integer, primary_key=True)
+    id_cartridge = sa.Column(sa.Integer,
+                             sa.ForeignKey('cartridge.id'))
+    time_operation = sa.Column(sa.DateTime)
+    departament = sa.Column(sa.Integer)
+    amount = sa.Column(sa.Integer)
+    name = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
+    unique_id_operation = sa.Column(sa.Integer)
+
+class StoreHouse(Base):
+    __tablename__ = 'storehouse'
+    id = sa.Column(sa.Integer, primary_key=True)
+    id_cartridge = sa.Column(sa.Integer,
+                             sa.ForeignKey('cartridge.id'))
+    unused = sa.Column(sa.Boolean)
+    __table_args__ = (sa.UniqueConstraint('id_cartridge', 'unused',
+                                       name='_cartridge_unused'),)
 
 
 class ModelPrinter(Base):
@@ -46,6 +81,8 @@ class ModelPrinter(Base):
     cartridges = orm.relationship('Cartridge',
                                   secondary=association_cartridge,
                                   back_populates='model_printers')
+    __table_args__ = (sa.UniqueConstraint('brand', 'model',
+                                       name='_brand_model'),)
 
     def __repr__(self):
         return f'ModelPrinter={self.model}, brand="{self.brand}"'

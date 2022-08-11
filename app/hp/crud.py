@@ -244,3 +244,82 @@ async def update_printer_with_history(db: AsyncSession,
     await db.refresh(db_history)
 
     return printer
+
+
+async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
+
+    db_cartridge = models.Cartridge(number=cartridge.number,
+                                    models_printers=cartridge.model_printer)
+    db.add(db_cartridge)
+    try:
+        await db.commit()
+    except Exception as e:
+        print(e)
+        await db.rollback()
+        raise
+    await db.refresh(db_cartridge)
+    return db_cartridge
+
+
+async def update_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
+    # TODO нужно реалзиовать обновление картриджа
+    pass
+
+
+async def delete_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
+    # TODO нужно реалзиовать удаление картриджа
+    pass
+
+
+async def return_cartridge_from_departament(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать возврат картриджа на заправку
+    pass
+
+
+async def replace_cartridge_departament(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать замену картриджа на заправку
+    pass
+
+
+async def put_cartridge_departament(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать передачу картриджа на отделу без возврата
+    pass
+
+
+async def put_cartridge_departament_with_return(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать передачу картриджа на отделу c возвратом
+    pass
+
+
+async def send_cartridge_to_service(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать отправку картриджей на заправку
+    pass
+
+
+async def return_cartridge_from_service(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать прием картриджей с заправки
+    pass
+
+
+async def report_cartridgies_on_storehouse_unused(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать отчет по картриджам
+    pass
+
+
+async def report_cartridgies_on_storehouse_used(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать отчет по картриджам требующих заправки
+    pass
+
+
+async def report_cartridges_with_model(db: AsyncSession,
+                                         cartridge: schemas.Cartridge):
+    # TODO нужно реализовать отчет по картриджам по моделям принтеров
+    pass

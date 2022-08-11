@@ -20,11 +20,13 @@ class User(UserBase):
         orm_mode = True
 
 
-class Cartridge(BaseModel):
-    id: int
+class CartridgeBase(BaseModel):
     number: str
     model_printers: int
-    departament: Optional[str]
+
+
+class Cartridge(CartridgeBase):
+    id: int
 
     class Config:
         orm_mode = True
