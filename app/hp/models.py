@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy import orm
 import sqlalchemy as sa
-from hp.db import Base
+from app.hp.db import Base
 
 
 class User(Base):
@@ -61,6 +61,7 @@ class JournalInnerConsume(Base):
     amount = sa.Column(sa.Integer)
     name = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
     unique_id_operation = sa.Column(sa.Integer)
+
 
 class StoreHouse(Base):
     __tablename__ = 'storehouse'

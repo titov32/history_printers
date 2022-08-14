@@ -5,9 +5,9 @@ from datetime import datetime
 
 from sqlalchemy.orm.strategy_options import joinedload
 
-from hp import models
-from hp import schemas
-from qr.utils import make_qr_code_by_path
+from app.hp import models
+from app.hp import schemas
+from app.qr.utils import make_qr_code_by_path
 
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
@@ -36,36 +36,26 @@ async def get_user_by_email(db: AsyncSession, email: str):
 
 
 async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
-    query: select = select(models.User, models.Item) \
-        .join(models.Item.owner) \
+    query: select = select(models.User) \
         .where(models.User.id >= skip).limit(limit)
     users = await db.execute(query)
     users_all = users.all()
-    # TODO Убрать items
     return users_all
 
 
-async def get_cartridge(db: AsyncSession, cartridge_id: int):
-    statement = select(models.Cartridge)\
-                .where(models.Cartridge.id == cartridge_id)
-    cartridges = await db.execute(statement)
-    return cartridges.all()
-
-
 async def get_printer_by_model(db: AsyncSession, model: str):
-    statement = select(models.ModelPrinter)\
-                .where(models.ModelPrinter.model == model)
+    statement = select(models.ModelPrinter) \
+        .where(models.ModelPrinter.model == model)
     return (await db.execute(statement)).first()
 
 
 async def get_model_printer_by_id(db: AsyncSession, id_: int):
-    statement = select(models.ModelPrinter)\
-                .where(models.ModelPrinter.id == id_)
+    statement = select(models.ModelPrinter) \
+        .where(models.ModelPrinter.id == id_)
     return (await db.execute(statement)).first()
 
 
 async def create_model(db: AsyncSession, printer: schemas.ModelPrinterCreate):
-
     db_printer = models.ModelPrinter(brand=printer.brand,
                                      model=printer.model,
                                      type_p=printer.type_p.value,
@@ -99,8 +89,8 @@ async def read_model_printers(db: AsyncSession):
 
 
 async def delete_model_printer(db: AsyncSession, id_: int):
-    statement = delete(models.ModelPrinter)\
-                .where(models.ModelPrinter.id == id_)
+    statement = delete(models.ModelPrinter) \
+        .where(models.ModelPrinter.id == id_)
     await db.execute(statement)
     await db.commit()
     return {"delete model_printer_id": id_}
@@ -134,23 +124,23 @@ async def get_printer_by_sn(db: AsyncSession, sn: str):
 
 async def get_printers_by_model_id(db: AsyncSession, model_id: int):
     statement = select(models.Printer, models.ModelPrinter) \
-                .join(models.ModelPrinter) \
-                .where(models.Printer.model_id == model_id)
+        .join(models.ModelPrinter) \
+        .where(models.Printer.model_id == model_id)
     gotten_printers = await db.execute(statement)
     return gotten_printers.all()
 
 
 async def get_printers_by_departament(db: AsyncSession, departament: str):
     statement = select(models.Printer, models.ModelPrinter) \
-                .join(models.ModelPrinter) \
-                .where(models.Printer.departament == departament)
+        .join(models.ModelPrinter) \
+        .where(models.Printer.departament == departament)
     gotten_printers = await db.execute(statement)
     return gotten_printers.all()
 
 
 async def get_all_printers(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
-                .join(models.ModelPrinter)
+        .join(models.ModelPrinter)
     gotten_printer = await db.execute(statement)
     return gotten_printer.all()
 
@@ -194,8 +184,8 @@ async def get_printer_by_id_with_history(db: AsyncSession, id: int):
         .order_by(models.History.date.desc())
     printers = await db.execute(statement)
     statement = select(models.ModelPrinter, models.Printer) \
-                .where(models.Printer.id==id) \
-                .join(models.Printer)
+        .where(models.Printer.id == id) \
+        .join(models.Printer)
     models_printer = await db.execute(statement)
     return models_printer.all() + printers.all()
 
@@ -218,7 +208,7 @@ async def delete_printer(db: AsyncSession, printer_id):
     return {"delete printer_id": printer_id}
 
 
-async def create_history_printer( db: AsyncSession, user_id, history: schemas.HistoryBase):
+async def create_history_printer(db: AsyncSession, user_id, history: schemas.HistoryBase):
     db_history = models.History(**history.dict(), author_id=user_id,
                                 date=datetime.now())
     db.add(db_history)
@@ -246,10 +236,17 @@ async def update_printer_with_history(db: AsyncSession,
     return printer
 
 
-async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
+async def get_cartridge(db: AsyncSession, cartridge_id: int):
+    statement = select(models.Cartridge) \
+        .where(models.Cartridge.id == cartridge_id)
+    cartridges = await db.execute(statement)
+    return cartridges.all()
 
+
+async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
+    # TODO нужно проверить создание картриджа
     db_cartridge = models.Cartridge(number=cartridge.number,
-                                    models_printers=cartridge.model_printer)
+                                    models_printers=cartridge.model_printers)
     db.add(db_cartridge)
     try:
         await db.commit()
@@ -262,79 +259,53 @@ async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
 
 
 async def update_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
-    # TODO нужно реалзиовать обновление картриджа
-    pass
+    # TODO нужно проверить обновление картриджа
+
+    statement = update(models.Cartridge) \
+        .where(models.Cartridge.id == cartridge.id) \
+        .values(cartridge.dict())
+    await db.execute(statement)
+    await db.commit()
+    return cartridge.dict()
 
 
-async def delete_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
-    # TODO нужно реалзиовать удаление картриджа
-    pass
+async def delete_cartridge(db: AsyncSession, cartridge_id: int):
+    # TODO нужно проверить удаление картриджа
+    cartridge_delete = delete(models.Cartridge).where(models.Cartridge.id == cartridge_id). \
+        execution_options(synchronize_session="fetch")
+    await db.execute(cartridge_delete)
+    await db.commit()
+    return {"delete cartridge_id": cartridge_id}
 
 
 async def create_counter_cartridge(db: AsyncSession,
-                                   cartridge: schemas.CounterCartridgeBase):
+                                   counter_cartridge: schemas.CounterCartridgeBase):
     # TODO нужно реалзиовать создание записи картриджа
-    # stmt = insert(models.CounterCartridge).values(
-    #     id_cartridge=cartridge.id_cartrdige,
-    #     departament = cartridge.departament,
-    #     amount = cartridge.amount)
-    # do_update_stmt = stmt.on_conflict_do_update(
-    #     index_elements = ['id'],
-    #     set_=dict(amount=amount+amount, )
-    # )
-    pass
+    db_counter_cartridge = models.CounterCartridge(departament=counter_cartridge.departament,
+                                                   amount=counter_cartridge.amount)
+    db.add(db_counter_cartridge)
+    try:
+        await db.commit()
+    except Exception as e:
+        print(e)
+        await db.rollback()
+        raise
+    await db.refresh(db_counter_cartridge)
+    return db_counter_cartridge
 
 
-async def return_cartridge_from_departament(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать возврат картриджа на заправку
-    """Нужно отобразить транзакцию в журнале, понизить счетчик в
-    CounterCartidge и повысить счетчик в StoreHouse"""
+async def create_cartridge_in_store_house(db: AsyncSession,
+                                   counter_cartridge: schemas.CounterCartridgeBase):
+    # TODO нужно реалзиовать создание записи картриджа
+    db_counter_cartridge = models.CounterCartridge(departament=counter_cartridge.departament,
+                                                   amount=counter_cartridge.amount)
+    db.add(db_counter_cartridge)
+    try:
+        await db.commit()
+    except Exception as e:
+        print(e)
+        await db.rollback()
+        raise
+    await db.refresh(db_counter_cartridge)
+    return db_counter_cartridge
 
-
-async def replace_cartridge_departament(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать замену картриджа на заправку
-    pass
-
-
-async def put_cartridge_departament(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать передачу картриджа на отделу без возврата
-    pass
-
-
-async def put_cartridge_departament_with_return(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать передачу картриджа на отделу c возвратом
-    pass
-
-
-async def send_cartridge_to_service(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать отправку картриджей на заправку
-    pass
-
-
-async def return_cartridge_from_service(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать прием картриджей с заправки
-    pass
-
-
-async def report_cartridgies_on_storehouse_unused(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать отчет по картриджам
-    pass
-
-
-async def report_cartridgies_on_storehouse_used(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать отчет по картриджам требующих заправки
-    pass
-
-
-async def report_cartridges_with_model(db: AsyncSession,
-                                         cartridge: schemas.Cartridge):
-    # TODO нужно реализовать отчет по картриджам по моделям принтеров
-    pass

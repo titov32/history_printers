@@ -44,6 +44,35 @@ class CounterCartridge(CounterCartridgeBase):
     class Congig:
         orm_mode = True
 
+
+class StoreHouseBase(BaseModel):
+    id_cartridge: str
+    unused: bool
+    amount: int
+
+
+class StoreHouse(StoreHouseBase):
+    id: int
+
+    class Congig:
+        orm_mode = True
+
+
+class JournalInnerConsumeBase(BaseModel):
+    id_cartridge: int
+    departament: int
+    amount: int
+    name: int
+    unique_id_operation: int
+
+
+class JournalInnerConsume(JournalInnerConsumeBase):
+    id: int
+
+    class Congig:
+        orm_mode = True
+
+
 class TypeEnum(Enum):
     m = 'МФУ'
     p = 'Принтер'
@@ -99,11 +128,11 @@ class PrinterCreate(PrinterBase):
 class PrinterUpdate(PrinterBase):
     id: int
 
+
 class HistoryBase(BaseModel):
     printer_id: int
     description: str
     path_file: Optional[str] = None
-
 
 
 class History(HistoryBase):
