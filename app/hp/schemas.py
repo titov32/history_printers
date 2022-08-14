@@ -32,6 +32,18 @@ class Cartridge(CartridgeBase):
         orm_mode = True
 
 
+class CounterCartridgeBase(BaseModel):
+    id_cartrdige:int
+    departament: int
+    amount:int
+
+
+class CounterCartridge(CounterCartridgeBase):
+    id: int
+
+    class Congig:
+        orm_mode = True
+
 class TypeEnum(Enum):
     m = 'МФУ'
     p = 'Принтер'

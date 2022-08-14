@@ -50,7 +50,7 @@ async def read_users(skip: int = 0, limit: int = 100,
     "/cartridge/{cartridge_id}")  # , response_model=schemas.Cartridge
 async def read_cartridge(cartridge_id: int,
                          db: AsyncSession = Depends(get_db)):
-    db_cartridge = crud.get_cartridge(db, cartridge_id)
+    db_cartridge = await crud.get_cartridge(db, cartridge_id)
     if db_cartridge is None:
         raise HTTPException(status_code=404, detail="Cartridge is not found")
     return await db_cartridge

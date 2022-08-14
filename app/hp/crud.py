@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from datetime import datetime
 
 from sqlalchemy.orm.strategy_options import joinedload
@@ -271,10 +271,25 @@ async def delete_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
     pass
 
 
+async def create_counter_cartridge(db: AsyncSession,
+                                   cartridge: schemas.CounterCartridgeBase):
+    # TODO нужно реалзиовать создание записи картриджа
+    # stmt = insert(models.CounterCartridge).values(
+    #     id_cartridge=cartridge.id_cartrdige,
+    #     departament = cartridge.departament,
+    #     amount = cartridge.amount)
+    # do_update_stmt = stmt.on_conflict_do_update(
+    #     index_elements = ['id'],
+    #     set_=dict(amount=amount+amount, )
+    # )
+    pass
+
+
 async def return_cartridge_from_departament(db: AsyncSession,
                                          cartridge: schemas.Cartridge):
     # TODO нужно реализовать возврат картриджа на заправку
-    pass
+    """Нужно отобразить транзакцию в журнале, понизить счетчик в
+    CounterCartidge и повысить счетчик в StoreHouse"""
 
 
 async def replace_cartridge_departament(db: AsyncSession,

@@ -39,15 +39,17 @@ class Cartridge(Base):
                                       secondary=association_cartridge,
                                       back_populates='cartridges')
 
-class CounterCartidge(Base):
+
+class CounterCartridge(Base):
     __tablename__ = 'counter_cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
     id_cartridge = sa.Column(sa.Integer,
                          sa.ForeignKey('cartridge.id'))
-    departament = sa.Column(sa.String)
+    departament = sa.Column(sa.Integer, sa.ForeignKey('departament.id'))
     amount = sa.Column(sa.Integer)
     __table_args__ = (sa.UniqueConstraint('id_cartridge', 'departament',
                                           name='_cartridge_departament'),)
+
 
 class JournalInnerConsume(Base):
     __tablename__ = 'journal_inner_consume'
@@ -66,6 +68,7 @@ class StoreHouse(Base):
     id_cartridge = sa.Column(sa.Integer,
                              sa.ForeignKey('cartridge.id'))
     unused = sa.Column(sa.Boolean)
+    amount = sa.Column(sa.Integer)
     __table_args__ = (sa.UniqueConstraint('id_cartridge', 'unused',
                                        name='_cartridge_unused'),)
 
