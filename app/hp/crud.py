@@ -297,8 +297,7 @@ async def create_counter_cartridge(db: AsyncSession,
 async def create_cartridge_in_store_house(db: AsyncSession,
                                    counter_cartridge: schemas.CounterCartridgeBase):
     # TODO нужно реалзиовать создание записи картриджа
-    db_counter_cartridge = models.CounterCartridge(departament=counter_cartridge.departament,
-                                                   amount=counter_cartridge.amount)
+    db_counter_cartridge = models.CounterCartridge(**counter_cartridge.dict())
     db.add(db_counter_cartridge)
     try:
         await db.commit()
@@ -309,3 +308,13 @@ async def create_cartridge_in_store_house(db: AsyncSession,
     await db.refresh(db_counter_cartridge)
     return db_counter_cartridge
 
+async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,
+                                                           id: int,
+                                                           unused:bool):
+    statement = select(models.StoreHouse).\
+        where(models.StoreHouse.id_cartridge == id and models.StoreHouse.unused==unused)
+    response = await db.execute(statement)
+    return response.first()
+
+async def get_counter_by_cart_id_and_depart(db: AsyncSession, id:int, depart:int):
+    pass
