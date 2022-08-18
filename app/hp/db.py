@@ -10,7 +10,7 @@ SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DATABASEURL}'
 # for SQLite
 # SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True,)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False,)
 
 async_session = orm.sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 

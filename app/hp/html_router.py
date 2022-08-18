@@ -5,9 +5,9 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 
-from hp import crud
-from hp import schemas
-from hp.db import get_db
+from app.hp import crud
+from app.hp import schemas
+from app.hp.db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from asyncpg.exceptions import ForeignKeyViolationError
@@ -48,8 +48,7 @@ async def get_all_models_printer(request: Request,
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
-async def create_model_printer(request: Request,
-                               brand=Form(),
+async def create_model_printer(brand=Form(),
                                model=Form(),
                                type_p=Form(),
                                format_paper=Form(),
@@ -59,9 +58,7 @@ async def create_model_printer(request: Request,
                                        type_p=type_p,
                                        format_paper=format_paper)
     await crud.create_model(db, model)
-    models = await crud.read_model_printers(db)
-    return templates.TemplateResponse("models_printer.html",
-                                      {"request": request, "models": models})
+    return RedirectResponse(url=f'/models_printer', status_code=302)
 
 
 @hp_html_router.get("/erase_model/{id}", response_class=HTMLResponse)
@@ -114,6 +111,7 @@ async def get_all_printers_by_model(request: Request, departament: str,
     return templates.TemplateResponse("printers_model_id.html", context
                                       )
 
+
 @hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
 async def create_printer(request: Request, model_id: int,
                          departament=Form(),
@@ -144,10 +142,8 @@ async def create_printer(request: Request, model_id: int,
         await crud.create_printer(db, printer=printer)
     except Exception as e:
         print(f'Не обработанная ошибка {e}')
-    printers = await crud.get_printers_by_model_id(db, model_id=model_id)
-    return templates.TemplateResponse("printers_model_id.html",
-                                      {"request": request,
-                                       "printers": printers})
+
+    return RedirectResponse(url=f'/printers/{model_id}', status_code=302)
 
 
 @hp_html_router.get("/erase_printer/{id}", response_class=HTMLResponse)
@@ -184,7 +180,7 @@ async def create_record_for_printer(request: Request, id_: int,
     context = {"request": request,
                "printers": printer}
 
-    return templates.TemplateResponse("printer_with_history.html", context)
+    return RedirectResponse(url=f'/printer/{id_}', status_code=302)
 
 
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)

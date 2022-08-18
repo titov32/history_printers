@@ -39,6 +39,12 @@ async def shipment_of_cartridges(db: AsyncSession,
 async def receipt_of_cartridges(db: AsyncSession,
                                         cartridges: [schemas.Cartridge]):
     # TODO нужно реализовать прием картриджей с заправки
+    for cartridge in cartridges:
+        check_value = await crud.get_cartridge_in_store_house_by_cartridge_unused(db=db, unused=True, id=cartridge.id)
+        if check_value:
+            await crud.update_cartridge_in_storehouse(db=db, cartridge=cartridge, unused=True)
+        else:
+            await crud.create_cartridge_in_store_house(db=db, counter_cartridge=cartridge)
     # TODO нужно повысить счетчики в StoreHouse
     # TODO нужно отобразить JournalInnerConsume
 
