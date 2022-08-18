@@ -236,17 +236,22 @@ async def update_printer_with_history(db: AsyncSession,
     return printer
 
 
-async def get_cartridge(db: AsyncSession, cartridge_id: int):
+async def get_cartridge_by_id(db: AsyncSession, cartridge_id: int):
     statement = select(models.Cartridge) \
         .where(models.Cartridge.id == cartridge_id)
     cartridges = await db.execute(statement)
     return cartridges.all()
 
 
+async def get_cartridges(db: AsyncSession):
+    statement = select(models.Cartridge)
+    cartridges = await db.execute(statement)
+    return cartridges.scalars().all()
+
+
 async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
     # TODO нужно проверить создание картриджа
-    db_cartridge = models.Cartridge(number=cartridge.number,
-                                    models_printers=cartridge.model_printers)
+    db_cartridge = models.Cartridge(number=cartridge.number)
     db.add(db_cartridge)
     try:
         await db.commit()
@@ -333,3 +338,9 @@ async def get_counter_by_cart_id_and_depart(db: AsyncSession, id:int, depart:int
         where(models.CounterCartridge.id_cartridge == id and models.CounterCartridge.departament == depart)
     response = await db.execute(statement)
     return response.first()
+
+
+async def add_cart_for_model(db: AsyncSession, model:int, cart:int):
+    ins = models.association_cartridge.insert().values(model_printer_id=model, cartridge_id=cart)
+    await db.execute(ins)
+    await db.commit()

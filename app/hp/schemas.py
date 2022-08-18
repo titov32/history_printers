@@ -22,7 +22,6 @@ class User(UserBase):
 
 class CartridgeBase(BaseModel):
     number: str
-    model_printers: int
 
 
 class Cartridge(CartridgeBase):

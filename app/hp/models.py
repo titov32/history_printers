@@ -1,7 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy import orm
 import sqlalchemy as sa
-from app.hp.db import Base
+from sqlalchemy.future import select
+from app.hp.db import Base, async_session
 
 
 class User(Base):
@@ -29,6 +30,7 @@ class Departament(Base):
     __tablename__ = 'departament'
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String, nullable=False)
+    company = sa.Column(sa.String, nullable=False)
 
 
 class Cartridge(Base):

@@ -13,6 +13,8 @@ from fastapi.responses import HTMLResponse
 from asyncpg.exceptions import ForeignKeyViolationError
 from sqlalchemy.exc import IntegrityError
 
+
+
 hp_html_router = APIRouter(
     prefix='',
     tags=['html'],
@@ -256,3 +258,42 @@ async def update_printer(request: Request, id_: int,
 
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
 
+
+@hp_html_router.get("/cartridges", response_class=HTMLResponse)
+async def get_all_cartridges(request: Request,
+                                 db: AsyncSession = Depends(get_db)):
+    cartridges = await crud.get_cartridges(db)
+
+    return templates.TemplateResponse("cartridges.html",
+                                      {"request": request, "cartridges": cartridges,
+                                       "cartridges_active": "active"})
+
+
+@hp_html_router.post("/cartridges", response_class=HTMLResponse)
+async def create_cartridge(number=Form(),
+                               db: AsyncSession = Depends(get_db)):
+    cartridge = schemas.CartridgeBase(number=number)
+    await crud.create_cartridge(db, cartridge)
+    return RedirectResponse(url=f'/cartridges', status_code=302)
+
+
+@hp_html_router.get("/cartridge_add/{id_}", response_class=HTMLResponse)
+async def get_form_add_cartridges_to_model(request: Request,
+                               db: AsyncSession = Depends(get_db)):
+    cartridges = await crud.get_cartridges(db)
+
+    context = {"request": request,
+               "cartridges": cartridges,
+               "cartridges_active": "active"}
+    return templates.TemplateResponse("add_cartridge_to_model.html", context)
+
+
+@hp_html_router.post("/cartridge_add/{id_}", response_class=HTMLResponse)
+async def get_form_add_cartridges_to_model(request: Request,
+                                           id_:int,
+                                           cart=Form(),
+                               db: AsyncSession = Depends(get_db),):
+    cartridges = await crud.get_cartridges(db)
+    await crud.add_cart_for_model(db, model=id_, cart=int(cart))
+
+    return RedirectResponse(url=f'/models_printer', status_code=302)

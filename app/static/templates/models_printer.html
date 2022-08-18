@@ -26,8 +26,10 @@
          <td> {{model.type_p}} </td>
          <td> {{model.format_paper}} </td>
          <td> <a class="pressed-button"
-                 href="/erase_model/{{model.id}}"
-                 method = 'post'> удалить</a> </td>
+                 href="/erase_model/{{model.id}}"> удалить</a>
+                <a class="pressed-button"
+                 href="/cartridge_add/{{model.id}}"> добавить картридж</a>
+         </td>
     </tr>
      {% endfor %}
     </tbody>
