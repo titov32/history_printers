@@ -3,11 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, insert
 from datetime import datetime
 
-from sqlalchemy.orm.strategy_options import joinedload
-
-from app.hp import models
-from app.hp import schemas
-from app.qr.utils import make_qr_code_by_path
+from sqlalchemy.orm import joinedload
+from . import models
+from . import schemas
+from qr.utils import make_qr_code_by_path
 
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
@@ -84,7 +83,16 @@ async def update_model_printer(db: AsyncSession, printer: schemas.ModelPrinter):
 
 async def read_model_printers(db: AsyncSession):
     statement = select(models.ModelPrinter)
+
     response = await db.execute(statement)
+    st = select(models.Cartridge.number, models.ModelPrinter) \
+    .join(models.association_cartridge, models.association_cartridge.c.model_printer_id ==models.ModelPrinter.id) \
+    .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id)
+    r = await db.execute(st)
+    
+    for i in r.all():
+        print(i)
+
     return response.scalars().all()
 
 
@@ -127,13 +135,17 @@ async def get_printers_by_model_id(db: AsyncSession, model_id: int):
         .join(models.ModelPrinter) \
         .where(models.Printer.model_id == model_id)
     gotten_printers = await db.execute(statement)
+    # st = select(models.Printer).options(joinedload(models.Printer.model_printer))
+    # r = await db.execute(st)
+    # for i in r.all():
+    #     print(i)
     return gotten_printers.all()
 
 
-async def get_printers_by_departament(db: AsyncSession, departament: str):
+async def get_printers_by_departament(db: AsyncSession, department: int):
     statement = select(models.Printer, models.ModelPrinter) \
         .join(models.ModelPrinter) \
-        .where(models.Printer.departament == departament)
+        .where(models.Printer.department_id == department)
     gotten_printers = await db.execute(statement)
     return gotten_printers.all()
 
@@ -170,7 +182,7 @@ async def get_report_printer_free(db: AsyncSession):
 
 
 async def get_printer_by_id(db: AsyncSession, id: int):
-    statement = select(models.Printer).where(models.Printer.id == id)
+    statement = select(models.Printer, models.Department).join(models.Department).where(models.Printer.id == id)
     response = await db.execute(statement)
     return response.first()
 
@@ -250,8 +262,10 @@ async def get_cartridges(db: AsyncSession):
 
 
 async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
-    # TODO нужно проверить создание картриджа
-    db_cartridge = models.Cartridge(number=cartridge.number)
+    """
+    создание картриджа
+    """
+    db_cartridge = models.Cartridge(**cartridge.dict())
     db.add(db_cartridge)
     try:
         await db.commit()
@@ -344,3 +358,22 @@ async def add_cart_for_model(db: AsyncSession, model:int, cart:int):
     ins = models.association_cartridge.insert().values(model_printer_id=model, cartridge_id=cart)
     await db.execute(ins)
     await db.commit()
+
+
+async def get_departments(db: AsyncSession):
+    statement = select(models.Department)
+    departments = await db.execute(statement)
+    return departments.scalars().all()
+
+
+async def create_department(db: AsyncSession, department: schemas.DepartmentBase):
+    db_department = models.Department(**department.dict())
+    db.add(db_department)
+    try:
+        await db.commit()
+    except Exception as e:
+        print(e)
+        await db.rollback()
+        raise
+    await db.refresh(db_department)
+    return db_department

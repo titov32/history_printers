@@ -18,8 +18,3 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(hp_api_router)
 app.include_router(hp_html_router)
-
-
-@app.get('/')
-async def get_test():
-    return {'test': 'ok'}

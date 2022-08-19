@@ -22,7 +22,7 @@
 
     <tr>
 
-         <td> {{printer.departament}} </td>
+         <td> {{printer.department.name}} </td>
          <td> {{printer.ip}} </td>
          <td><a href="/printer/{{printer.id}}"> {{printer.sn}}</a>  </td>
          <td> {{printer.is_work}} </td>
@@ -42,11 +42,15 @@
         <label for="description" class="form-label">описание</label>
         <input type="text" class="form-control" name="description" id="description" value=" " >
     </div>
-  <div class="col-md-4">
-        <label for="departament" class="form-label">Отдел</label>
-        <input type="text" class="form-control" name="departament" id="departament" value="{{printer.departament}}" >
-  </div>
+  <div class="col-md-1">
+      <label for="department" class="department">Отдел</label>
+        <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="department" id="department" label=" Отдел">
+            {% for department in departments %}
 
+                 <option value={{department.id}}> {{department.name}}   </i> </option>
+            {% endfor %}
+        </select>
+  </div>
   <div class="col-md-2">
       <label for="ip" class="form-label">IP</label>
      <input type="text" class="form-control" name="ip" id="ip" value="{{printer.ip}}" >

@@ -26,7 +26,7 @@
     <tr>
          <td> {{printer[1].brand}} </td>
          <td> {{printer[1].model}} </td>
-         <td> <a href="/printers/departament/{{printer[0].departament}}"> {{printer[0].departament}} </a> </td>
+         <td> <a href="/printers/department/{{printer[0].department}}"> {{printer[0].department.name}} </a> </td>
         <td> {{printer[0].location}} </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
@@ -42,13 +42,18 @@
      {% endfor %}
     </tbody>
 </table>
-
+<p>Отделы {{departments}}</p>
 <h3>Добавление нового принтера</h3>
 <form class="row g-3" method="post">
 
-  <div class="col-md-4">
-        <label for="departament" class="form-label">Отдел</label>
-        <input type="text" class="form-control" name="departament" id="departament" value="" required>
+  <div class="col-md-1">
+      <label for="department" class="department">Отдел</label>
+        <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="department" id="department" label=" Отдел">
+            {% for department in departments %}
+
+                 <option value={{department.id}}>{{department.name}}   <i>{{department.company}}</i> </option>
+            {% endfor %}
+        </select>
   </div>
       <div class="col-md-4">
         <label for="location" class="form-label">Местоположение/кабинет</label>

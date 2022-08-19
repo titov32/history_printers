@@ -20,6 +20,18 @@ class User(UserBase):
         orm_mode = True
 
 
+class DepartmentBase(BaseModel):
+    name: str
+    company: str
+
+
+class Departament(DepartmentBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
 class CartridgeBase(BaseModel):
     number: str
 
@@ -104,7 +116,7 @@ class ModelPrinter(ModelPrinterBase):
 
 class PrinterBase(BaseModel):
     model_id: int
-    departament: str
+    department_id: int
     ip: Optional[IPv4Interface] = None
     sn: str
     is_work: Optional[bool] = True
