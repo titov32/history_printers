@@ -39,13 +39,10 @@ async def welcome(request: Request,
 @hp_html_router.get("/models_printer", response_class=HTMLResponse)
 async def get_all_models_printer(request: Request,
                                  db: AsyncSession = Depends(get_db)):
-    models = await crud.read_model_printers(db)
     models_with_cartridges = await crud.read_model_with_cartridges(db)
-    context = {"request": request, "models": models,
+    context = {"request": request,
                "models_with_cartridges": models_with_cartridges,
                "models_printer_active": "active"}
-    print(models)
-    print(models_with_cartridges)
     return templates.TemplateResponse("models_printer.html", context)
 
 
@@ -60,7 +57,6 @@ async def create_model_printer(brand=Form(),
                                        type_p=type_p,
                                        format_paper=format_paper)
     await crud.create_model(db, model)
-    print(Form())
     return RedirectResponse(url=f'/models_printer', status_code=302)
 
 
@@ -343,3 +339,15 @@ async def create_department(name=Form(),
                                          company=company)
     await crud.create_department(db, departament)
     return RedirectResponse(url=f'/departments', status_code=302)
+
+
+@hp_html_router.get("/storehouse", response_class=HTMLResponse)
+async def get_storehouse(request: Request,
+                              db: AsyncSession = Depends(get_db)):
+    storehouse_unused = await crud.get_all_cartridges_in_store_house(db, used=False)
+    storehouse_used = await crud.get_all_cartridges_in_store_house(db, used=True)
+    context = {"request": request,
+               "storehouse_unused": storehouse_unused,
+               "storehouse_used": storehouse_used
+               }
+    return templates.TemplateResponse("storehouse.html", context)

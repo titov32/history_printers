@@ -345,6 +345,13 @@ async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,
     return response.first()
 
 
+async def get_all_cartridges_in_store_house(db: AsyncSession, used):
+    statement = select(models.StoreHouse, models.Cartridge.number) \
+                .join(models.Cartridge) \
+                .where(models.StoreHouse.unused == used)
+    response = await db.execute(statement)
+    return response.all()
+
 async def update_cartridge_in_storehouse(db: AsyncSession, cartridge: schemas.Cartridge, unused: bool):
     # TODO нужно проверить обновление картриджа
 
@@ -364,6 +371,7 @@ async def get_counter_by_cart_id_and_depart(db: AsyncSession, id: int, depart: i
 
 
 async def add_cart_for_model(db: AsyncSession, model: int, cart: int):
+    # TODO нужно переделать в upsert, нужно избавится от дублей при добавление картриджей
     ins = models.association_cartridge.insert().values(model_printer_id=model, cartridge_id=cart)
     await db.execute(ins)
     await db.commit()

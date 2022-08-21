@@ -9,14 +9,33 @@
 
 <body>
 <nav class="nav nav-pills flex-column flex-sm-row">
-  <a class="flex-sm-fill text-sm-center nav-link  {{main_active}}" href="/">Главная</a>
-  <a class="flex-sm-fill text-sm-center nav-link {{models_printer_active}}" aria-current="page" href="/models_printer">Модели принтеров</a>
-  <a class="flex-sm-fill text-sm-center nav-link {{printer_active}}" href="/printers">Принтеры</a>
-  <a class="flex-sm-fill text-sm-center nav-link {{cartridges_active}}" href="/cartridges">Картриджи</a>
-  <a class="flex-sm-fill text-sm-center nav-link {{departments_active}}" href="/departments">Отделы</a>
-  <a class="flex-sm-fill text-sm-center nav-link " href="/docs">Сваггер</a>
-
-  <a class="flex-sm-fill text-sm-center nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+    <a class="flex-sm-fill text-sm-center nav-link  {{main_active}}" href="/">Главная</a>
+    <a class="flex-sm-fill text-sm-center nav-link {{printer_active}}" href="/printers">Принтеры</a>
+    <a class="flex-sm-fill text-sm-center nav-link " href="/docs">Сваггер</a>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Перемещение
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="/storehouse">Остатки на складе </a></li>
+        <li><a class="dropdown-item" href="#">Пополнение склада</a></li>
+        <li><a class="dropdown-item" href="#">Замена картриджа</a></li>
+        <li><a class="dropdown-item" href="#">Отправка картриджей на заправку</a></li>
+        </ul>
+    </li>
+            <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Справочники
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown1">
+            <li><a class="dropdown-item" href="/models_printer">Модели принтеров</a></li>
+              <li><a class="dropdown-item" href="/cartridges">Картриджи</a></li>
+            <li><a class="dropdown-item" href="/departments">Отделы</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+  <a class="flex-sm-fill text-sm-center nav-link disabled" href="/docs" tabindex="-1" aria-disabled="true">Сваггер</a>
 </nav>
 {% block content %}
     
