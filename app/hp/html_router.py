@@ -41,11 +41,11 @@ async def get_all_models_printer(request: Request,
                                  db: AsyncSession = Depends(get_db)):
     models = await crud.read_model_printers(db)
     models_with_cartridges = await crud.read_model_with_cartridges(db)
-    print(models_with_cartridges)
-
     context = {"request": request, "models": models,
                "models_with_cartridges": models_with_cartridges,
                "models_printer_active": "active"}
+    print(models)
+    print(models_with_cartridges)
     return templates.TemplateResponse("models_printer.html", context)
 
 
@@ -60,6 +60,7 @@ async def create_model_printer(brand=Form(),
                                        type_p=type_p,
                                        format_paper=format_paper)
     await crud.create_model(db, model)
+    print(Form())
     return RedirectResponse(url=f'/models_printer', status_code=302)
 
 

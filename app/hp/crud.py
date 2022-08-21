@@ -89,8 +89,8 @@ async def read_model_printers(db: AsyncSession):
 
 async def read_model_with_cartridges(db: AsyncSession):
     st = select(models.ModelPrinter, models.Cartridge.number) \
-        .join(models.association_cartridge, models.association_cartridge.c.model_printer_id == models.ModelPrinter.id) \
-        .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id)
+        .join(models.association_cartridge, models.association_cartridge.c.model_printer_id == models.ModelPrinter.id, isouter=True) \
+        .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id, isouter=True)
     r = await db.execute(st)
     d={}
     for i in r.all():
