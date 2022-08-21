@@ -40,10 +40,13 @@ async def welcome(request: Request,
 async def get_all_models_printer(request: Request,
                                  db: AsyncSession = Depends(get_db)):
     models = await crud.read_model_printers(db)
+    models_with_cartridges = await crud.read_model_with_cartridges(db)
+    print(models_with_cartridges)
 
-    return templates.TemplateResponse("models_printer.html",
-                                      {"request": request, "models": models,
-                                       "models_printer_active": "active"})
+    context = {"request": request, "models": models,
+               "models_with_cartridges": models_with_cartridges,
+               "models_printer_active": "active"}
+    return templates.TemplateResponse("models_printer.html", context)
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
@@ -67,10 +70,10 @@ async def delete_printer(request: Request, id: int,
     return RedirectResponse("/models_printer")
 
 
-@hp_html_router.get("/printer/{id}", response_class=HTMLResponse)
-async def get_printer_with_history(request: Request, id: int,
+@hp_html_router.get("/printer/{id_}", response_class=HTMLResponse)
+async def get_printer_with_history(request: Request, id_: int,
                                    db: AsyncSession = Depends(get_db)):
-    printer = await crud.get_printer_by_id_with_history(db, id)
+    printer = await crud.get_printer_by_id_with_history(db, id_)
     context = {"request": request,
                "printers": printer,
                "printer_active": "active"}
@@ -84,7 +87,7 @@ async def get_all_printers(request: Request,
     departments = await crud.get_departments(db)
     context = {"request": request,
                "printers": printers,
-               "departments":departments,
+               "departments": departments,
                "printer_active": "active"}
     return templates.TemplateResponse("printers.html", context)
 
@@ -98,13 +101,13 @@ async def get_all_printers_by_model(request: Request, model_id: int,
     context = {"request": request,
                "printers": printers,
                "model_id": model_id,
-               "departments":departments,
+               "departments": departments,
                "printer_active": "active"}
     return templates.TemplateResponse("printers_model_id.html", context)
 
 
 @hp_html_router.post("/printers/{model_id}", response_class=HTMLResponse)
-async def create_printer(request: Request, model_id: int,
+async def create_printer(model_id: int,
                          department_id=Form(),
                          ip=Form(),
                          sn=Form(),
@@ -139,10 +142,10 @@ async def create_printer(request: Request, model_id: int,
 
 @hp_html_router.get("/printers/department/{department}",
                     response_class=HTMLResponse)
-async def get_all_printers_by_model(request: Request, departament: str,
+async def get_all_printers_by_model(request: Request, departament: int,
                                     db: AsyncSession = Depends(get_db)):
     printers = await crud.get_printers_by_departament(db,
-                                                      departament_id=departament)
+                                                      department=departament)
     context = {"request": request,
                "printers": printers,
                "departament": departament,
@@ -182,7 +185,6 @@ async def create_record_for_printer(request: Request, id_: int,
                                  path_file=path_file)
     await crud.create_history_printer(db, user_id, record)
 
-
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
 
 
@@ -194,7 +196,7 @@ async def get_form_for_update_printer(request: Request, id_: int,
     departments = await crud.get_departments(db)
     context = {"request": request,
                "printer": printer[0],
-               "departments":departments}
+               "departments": departments}
     return templates.TemplateResponse("update_printer.html", context)
 
 
@@ -265,11 +267,10 @@ async def update_printer(request: Request, id_: int,
 async def get_all_cartridges(request: Request,
                              db: AsyncSession = Depends(get_db)):
     cartridges = await crud.get_cartridges(db)
-
-    return templates.TemplateResponse("cartridges.html",
-                                      {"request": request,
-                                       "cartridges": cartridges,
-                                       "cartridges_active": "active"})
+    context = {"request": request,
+               "cartridges": cartridges,
+               "cartridges_active": "active"}
+    return templates.TemplateResponse("cartridges.html", context=context)
 
 
 @hp_html_router.post("/cartridges", response_class=HTMLResponse)
@@ -287,18 +288,39 @@ async def get_form_add_cartridges_to_model(request: Request,
 
     context = {"request": request,
                "cartridges": cartridges,
-               "cartridges_active": "active"}
+               "cartridges_active": "active",
+               "button": "btn-primary",
+               "text_button": "Добавить картридж"}
     return templates.TemplateResponse("add_cartridge_to_model.html", context)
 
 
 @hp_html_router.post("/cartridge_add/{id_}", response_class=HTMLResponse)
-async def get_form_add_cartridges_to_model(request: Request,
-                                           id_: int,
+async def get_form_add_cartridges_to_model(id_: int,
                                            cart=Form(),
-                                           db: AsyncSession = Depends(
-                                               get_db), ):
-    cartridges = await crud.get_cartridges(db)
+                                           db: AsyncSession = Depends(get_db), ):
     await crud.add_cart_for_model(db, model=id_, cart=int(cart))
+
+    return RedirectResponse(url=f'/models_printer', status_code=302)
+
+
+@hp_html_router.get("/cartridge_delete/{id_}", response_class=HTMLResponse)
+async def get_form_delete_cartridges_from_model(id_: int, request: Request,
+                                                db: AsyncSession = Depends(get_db)):
+    cartridges = await crud.get_cartridges_by_model_id(db, id_)
+
+    context = {"request": request,
+               "cartridges": cartridges,
+               "cartridges_active": "active",
+               "button": "btn-danger",
+               "text_button": "Удалить картридж"}
+    return templates.TemplateResponse("add_cartridge_to_model.html", context)
+
+
+@hp_html_router.post("/cartridge_delete/{id_}", response_class=HTMLResponse)
+async def get_form_add_cartridges_to_model(id_: int,
+                                           cart=Form(),
+                                           db: AsyncSession = Depends(get_db), ):
+    await crud.delete_cart_for_model(db, model=id_, cart=int(cart))
 
     return RedirectResponse(url=f'/models_printer', status_code=302)
 
@@ -320,4 +342,3 @@ async def create_department(name=Form(),
                                          company=company)
     await crud.create_department(db, departament)
     return RedirectResponse(url=f'/departments', status_code=302)
-

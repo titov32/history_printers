@@ -15,20 +15,24 @@
         <th scope="col"><b>Модель</b> </th>
         <th scope="col"><b>Тип</b> </th>
         <th scope="col"><b>Формат бумаги</b> </th>
+        <th scope="col"><b>Картриджи</b> </th>
         <th scope="col"><b>Операция</b> </th>
     </tr>
     <tbody>
-    {% for model in models %}
+    {% for model in models_with_cartridges%}
     <tr>
          <td> <a href="/printers/{{model.id}}"> {{model.id}}</a> </td>
          <td> {{model.brand}} </td>
          <td> {{model.model}} </td>
          <td> {{model.type_p}} </td>
          <td> {{model.format_paper}} </td>
+         <td> {{models_with_cartridges[model]}} </td>
          <td> <a class="pressed-button"
-                 href="/erase_model/{{model.id}}"> удалить</a>
+                 href="/erase_model/{{model.id}}"> удалить модель</a>
                 <a class="pressed-button"
                  href="/cartridge_add/{{model.id}}"> добавить картридж</a>
+             <a class="pressed-button"
+                 href="/cartridge_delete/{{model.id}}"> Удалить картридж</a>
          </td>
     </tr>
      {% endfor %}

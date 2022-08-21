@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.orm import joinedload
 from . import models
 from . import schemas
-from qr.utils import make_qr_code_by_path
+from app.qr.utils import make_qr_code_by_path
 
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
@@ -83,17 +83,21 @@ async def update_model_printer(db: AsyncSession, printer: schemas.ModelPrinter):
 
 async def read_model_printers(db: AsyncSession):
     statement = select(models.ModelPrinter)
-
     response = await db.execute(statement)
-    st = select(models.Cartridge.number, models.ModelPrinter) \
-    .join(models.association_cartridge, models.association_cartridge.c.model_printer_id ==models.ModelPrinter.id) \
-    .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id)
-    r = await db.execute(st)
-    
-    for i in r.all():
-        print(i)
-
     return response.scalars().all()
+
+
+async def read_model_with_cartridges(db: AsyncSession):
+    st = select(models.ModelPrinter, models.Cartridge.number) \
+        .join(models.association_cartridge, models.association_cartridge.c.model_printer_id == models.ModelPrinter.id) \
+        .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id)
+    r = await db.execute(st)
+    d={}
+    for i in r.all():
+        d.setdefault(i[0], [])
+        if i[1] not in d[i[0]]:
+            d[i[0]].append(i[1])
+    return d
 
 
 async def delete_model_printer(db: AsyncSession, id_: int):
@@ -135,10 +139,6 @@ async def get_printers_by_model_id(db: AsyncSession, model_id: int):
         .join(models.ModelPrinter) \
         .where(models.Printer.model_id == model_id)
     gotten_printers = await db.execute(statement)
-    # st = select(models.Printer).options(joinedload(models.Printer.model_printer))
-    # r = await db.execute(st)
-    # for i in r.all():
-    #     print(i)
     return gotten_printers.all()
 
 
@@ -261,6 +261,14 @@ async def get_cartridges(db: AsyncSession):
     return cartridges.scalars().all()
 
 
+async def get_cartridges_by_model_id(db: AsyncSession, model_id:int):
+    st = select(models.Cartridge).select_from(models.association_cartridge) \
+        .join(models.Cartridge, models.association_cartridge.c.cartridge_id == models.Cartridge.id) \
+        .where(models.association_cartridge.c.model_printer_id == model_id)
+    r = await db.execute(st)
+
+    return r.scalars().all()
+
 async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
     """
     создание картриджа
@@ -314,7 +322,7 @@ async def create_counter_cartridge(db: AsyncSession,
 
 
 async def create_cartridge_in_store_house(db: AsyncSession,
-                                   counter_cartridge: schemas.CounterCartridgeBase):
+                                          counter_cartridge: schemas.CounterCartridgeBase):
     # TODO нужно реалзиовать создание записи картриджа
     db_counter_cartridge = models.StoreHouse(**counter_cartridge.dict())
     db.add(db_counter_cartridge)
@@ -327,36 +335,45 @@ async def create_cartridge_in_store_house(db: AsyncSession,
     await db.refresh(db_counter_cartridge)
     return db_counter_cartridge
 
+
 async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,
                                                            id: int,
-                                                           unused:bool):
-    statement = select(models.StoreHouse).\
-        where(models.StoreHouse.id_cartridge == id and models.StoreHouse.unused==unused)
+                                                           unused: bool):
+    statement = select(models.StoreHouse). \
+        where(models.StoreHouse.id_cartridge == id and models.StoreHouse.unused == unused)
     response = await db.execute(statement)
     return response.first()
 
 
-async def update_cartridge_in_storehouse(db: AsyncSession, cartridge: schemas.Cartridge, unused:bool):
+async def update_cartridge_in_storehouse(db: AsyncSession, cartridge: schemas.Cartridge, unused: bool):
     # TODO нужно проверить обновление картриджа
 
     statement = update(models.StoreHouse) \
-        .where(models.StoreHouse.id_cartridge == cartridge.id and models.StoreHouse.unused==unused) \
+        .where(models.StoreHouse.id_cartridge == cartridge.id and models.StoreHouse.unused == unused) \
         .values(cartridge.dict())
     await db.execute(statement)
     await db.commit()
     return cartridge.dict()
 
 
-async def get_counter_by_cart_id_and_depart(db: AsyncSession, id:int, depart:int):
+async def get_counter_by_cart_id_and_depart(db: AsyncSession, id: int, depart: int):
     statement = select(models.CounterCartridge). \
         where(models.CounterCartridge.id_cartridge == id and models.CounterCartridge.departament == depart)
     response = await db.execute(statement)
     return response.first()
 
 
-async def add_cart_for_model(db: AsyncSession, model:int, cart:int):
+async def add_cart_for_model(db: AsyncSession, model: int, cart: int):
     ins = models.association_cartridge.insert().values(model_printer_id=model, cartridge_id=cart)
     await db.execute(ins)
+    await db.commit()
+
+
+async def delete_cart_for_model(db: AsyncSession, model: int, cart: int):
+    delete_stmt = delete(models.association_cartridge) \
+        .where(models.association_cartridge.c.model_printer_id==model, models.association_cartridge.c.cartridge_id==cart) \
+        .execution_options(synchronize_session="fetch")
+    await db.execute(delete_stmt)
     await db.commit()
 
 

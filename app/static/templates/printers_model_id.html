@@ -47,8 +47,8 @@
 <form class="row g-3" method="post">
 
   <div class="col-md-1">
-      <label for="department" class="department">Отдел</label>
-        <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="department" id="department" label=" Отдел">
+      <label for="department_id" class="department">Отдел</label>
+        <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="department_id" id="department_id" label=" Отдел">
             {% for department in departments %}
 
                  <option value={{department.id}}>{{department.name}}   <i>{{department.company}}</i> </option>
