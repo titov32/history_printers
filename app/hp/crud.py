@@ -1,12 +1,10 @@
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete, insert
+from sqlalchemy import select, update, delete
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload
 from . import models
 from . import schemas
-from app.qr.utils import make_qr_code_by_path
+from .utils.qr import make_qr_code_by_path
 
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
@@ -151,8 +149,9 @@ async def get_printers_by_departament(db: AsyncSession, department: int):
 
 
 async def get_all_printers(db: AsyncSession):
-    statement = select(models.Printer, models.ModelPrinter) \
-        .join(models.ModelPrinter)
+    statement = select(models.Printer, models.ModelPrinter, models.Department) \
+        .join(models.ModelPrinter) \
+        .join(models.Department)
     gotten_printer = await db.execute(statement)
     return gotten_printer.all()
 

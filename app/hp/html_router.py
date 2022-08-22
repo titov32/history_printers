@@ -13,6 +13,8 @@ from fastapi.responses import HTMLResponse
 from asyncpg.exceptions import ForeignKeyViolationError
 from sqlalchemy.exc import IntegrityError
 
+from .utils.xlsx import create_xlsx_file
+
 hp_html_router = APIRouter(
     prefix='',
     tags=['html'],
@@ -81,13 +83,21 @@ async def get_printer_with_history(request: Request, id_: int,
 async def get_all_printers(request: Request,
                            db: AsyncSession = Depends(get_db)):
     printers = await crud.get_all_printers(db)
-    departments = await crud.get_departments(db)
     context = {"request": request,
                "printers": printers,
-               "departments": departments,
                "printer_active": "active"}
     return templates.TemplateResponse("printers.html", context)
 
+@hp_html_router.get("/get_excel_printer", response_class=HTMLResponse)
+async def get_all_printers(request: Request,
+                           db: AsyncSession = Depends(get_db)):
+    printers = await crud.get_all_printers(db)
+    context = {"request": request,
+               "printers": printers,
+               "printer_active": "active"}
+
+    create_xlsx_file(printers)
+    return RedirectResponse(url=f'/printers', status_code=302)
 
 @hp_html_router.get("/printers/{model_id}", response_class=HTMLResponse)
 async def get_all_printers_by_model(request: Request, model_id: int,
