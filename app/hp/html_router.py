@@ -1,18 +1,13 @@
-from typing import Union, List
-
+from typing import List
 from fastapi import APIRouter, Request, Form, UploadFile, File
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
-
 from . import crud
 from . import schemas
 from .db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from asyncpg.exceptions import ForeignKeyViolationError
-from sqlalchemy.exc import IntegrityError
-
 from .utils.xlsx import create_xlsx_file
 
 hp_html_router = APIRouter(
@@ -62,10 +57,10 @@ async def create_model_printer(brand=Form(),
     return RedirectResponse(url=f'/models_printer', status_code=302)
 
 
-@hp_html_router.get("/erase_model/{id}", response_class=HTMLResponse)
-async def delete_printer(request: Request, id: int,
+@hp_html_router.get("/erase_model/{id_}", response_class=HTMLResponse)
+async def delete_printer(id_: int,
                          db: AsyncSession = Depends(get_db)):
-    printer = await crud.delete_model_printer(db, id)
+    await crud.delete_model_printer(db, id_)
     return RedirectResponse("/models_printer")
 
 
@@ -88,16 +83,13 @@ async def get_all_printers(request: Request,
                "printer_active": "active"}
     return templates.TemplateResponse("printers.html", context)
 
-@hp_html_router.get("/get_excel_printer", response_class=HTMLResponse)
-async def get_all_printers(request: Request,
-                           db: AsyncSession = Depends(get_db)):
-    printers = await crud.get_all_printers(db)
-    context = {"request": request,
-               "printers": printers,
-               "printer_active": "active"}
 
+@hp_html_router.get("/get_excel_printer", response_class=HTMLResponse)
+async def get_all_printers_for_excel(db: AsyncSession = Depends(get_db)):
+    printers = await crud.get_all_printers(db)
     create_xlsx_file(printers)
     return RedirectResponse(url=f'/printers', status_code=302)
+
 
 @hp_html_router.get("/printers/{model_id}", response_class=HTMLResponse)
 async def get_all_printers_by_model(request: Request, model_id: int,
@@ -149,27 +141,28 @@ async def create_printer(model_id: int,
 
 @hp_html_router.get("/printers/department/{department}",
                     response_class=HTMLResponse)
-async def get_all_printers_by_model(request: Request, departament: int,
-                                    db: AsyncSession = Depends(get_db)):
+async def get_all_printers_by_department(request: Request, department: int,
+                                         db: AsyncSession = Depends(get_db)):
     printers = await crud.get_printers_by_departament(db,
-                                                      department=departament)
+                                                      department=department)
     context = {"request": request,
                "printers": printers,
-               "departament": departament,
+               "departament": department,
                "printer_active": "active"}
+    # TODO проверить работу метода
     return templates.TemplateResponse("printers_model_id.html", context
                                       )
 
 
-@hp_html_router.get("/erase_printer/{id}", response_class=HTMLResponse)
-async def get_printer_with_history(request: Request, id: int,
+@hp_html_router.get("/erase_printer/{id_}", response_class=HTMLResponse)
+async def get_printer_with_history(id_: int,
                                    db: AsyncSession = Depends(get_db)):
-    printer = await crud.delete_printer(db, id)
+    await crud.delete_printer(db, id_)
     return RedirectResponse("/printers")
 
 
 @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
-async def create_record_for_printer(request: Request, id_: int,
+async def create_record_for_printer(id_: int,
                                     description=Form(),
                                     files: List[UploadFile] = File(
                                         description="Multiple files as UploadFile"),
@@ -198,7 +191,6 @@ async def create_record_for_printer(request: Request, id_: int,
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
 async def get_form_for_update_printer(request: Request, id_: int,
                                       db: AsyncSession = Depends(get_db)):
-    user_id = 1
     printer = await crud.get_printer_by_id(db, id_)
     departments = await crud.get_departments(db)
     context = {"request": request,
@@ -208,7 +200,7 @@ async def get_form_for_update_printer(request: Request, id_: int,
 
 
 @hp_html_router.post("/update_printer/{id_}", response_class=HTMLResponse)
-async def update_printer(request: Request, id_: int,
+async def update_printer(id_: int,
                          db: AsyncSession = Depends(get_db),
                          department=Form(),
                          ip=Form(),
@@ -240,27 +232,26 @@ async def update_printer(request: Request, id_: int,
                                         id=id_,
                                         location=location)
     notice = ''
-    if printer_new.department_id != printer_old.department_id:
-        notice += f'Принтер перехал из {printer_old.department.name} в {printer_new.department.name}'
     if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded:
-        notice += f'Принтер сменил IP адрес на {printer_new.ip}'
+        notice += f'Принтер сменил IP адрес на {printer_new.ip} '
     if printer_new.location != printer_old.location:
-        notice += f'Принтер перехал из {printer_old.location} в {printer_new.location}'
+        notice += f'Принтер перехал из {printer_old.location}' \
+                  f' в {printer_new.location} '
     if printer_new.is_work != printer_old.is_work:
         if printer_old.is_work:
-            notice += f'Принтер перестал работать'
+            notice += f'Принтер перестал работать '
         else:
-            notice += f'Принтер заработал'
+            notice += f'Принтер заработал '
     if printer_new.is_free != printer_old.is_free:
         if printer_old.is_free:
-            notice += f'Принтер стал использоваться'
+            notice += f'Принтер стал использоваться '
         else:
             notice += f'Принтер освободился'
     if printer_new.repairing != printer_old.repairing:
         if printer_old.repairing:
-            notice += f'Принтер отремонтирован'
+            notice += f'Принтер отремонтирован '
         else:
-            notice += f'Принтер уехал в ремонт'
+            notice += f'Принтер уехал в ремонт '
 
     notice = f'{description} {notice}'
     record = schemas.HistoryBase(description=notice,
@@ -304,7 +295,8 @@ async def get_form_add_cartridges_to_model(request: Request,
 @hp_html_router.post("/cartridge_add/{id_}", response_class=HTMLResponse)
 async def get_form_add_cartridges_to_model(id_: int,
                                            cart=Form(),
-                                           db: AsyncSession = Depends(get_db), ):
+                                           db: AsyncSession = Depends(
+                                               get_db), ):
     await crud.add_cart_for_model(db, model=id_, cart=int(cart))
 
     return RedirectResponse(url=f'/models_printer', status_code=302)
@@ -312,7 +304,8 @@ async def get_form_add_cartridges_to_model(id_: int,
 
 @hp_html_router.get("/cartridge_delete/{id_}", response_class=HTMLResponse)
 async def get_form_delete_cartridges_from_model(id_: int, request: Request,
-                                                db: AsyncSession = Depends(get_db)):
+                                                db: AsyncSession = Depends(
+                                                    get_db)):
     cartridges = await crud.get_cartridges_by_model_id(db, id_)
 
     context = {"request": request,
@@ -326,7 +319,8 @@ async def get_form_delete_cartridges_from_model(id_: int, request: Request,
 @hp_html_router.post("/cartridge_delete/{id_}", response_class=HTMLResponse)
 async def get_form_add_cartridges_to_model(id_: int,
                                            cart=Form(),
-                                           db: AsyncSession = Depends(get_db), ):
+                                           db: AsyncSession = Depends(
+                                               get_db), ):
     await crud.delete_cart_for_model(db, model=id_, cart=int(cart))
 
     return RedirectResponse(url=f'/models_printer', status_code=302)
@@ -353,11 +347,13 @@ async def create_department(name=Form(),
 
 @hp_html_router.get("/storehouse", response_class=HTMLResponse)
 async def get_storehouse(request: Request,
-                              db: AsyncSession = Depends(get_db)):
-    storehouse_unused = await crud.get_all_cartridges_in_store_house(db, used=False)
-    storehouse_used = await crud.get_all_cartridges_in_store_house(db, used=True)
+                         db: AsyncSession = Depends(get_db)):
+    sh_unused = await crud.get_all_cartridges_in_store_house(db,
+                                                             used=False)
+    sh_used = await crud.get_all_cartridges_in_store_house(db,
+                                                           used=True)
     context = {"request": request,
-               "storehouse_unused": storehouse_unused,
-               "storehouse_used": storehouse_used
+               "storehouse_unused": sh_unused,
+               "storehouse_used": sh_used
                }
     return templates.TemplateResponse("storehouse.html", context)

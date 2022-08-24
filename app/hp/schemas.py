@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import Optional
 from pydantic import BaseModel
 from ipaddress import IPv4Interface
 from enum import Enum
@@ -44,15 +44,15 @@ class Cartridge(CartridgeBase):
 
 
 class CounterCartridgeBase(BaseModel):
-    id_cartrdige:int
+    id_cartridge: int
     departament: int
-    amount:int
+    amount: int
 
 
 class CounterCartridge(CounterCartridgeBase):
     id: int
 
-    class Congig:
+    class Config:
         orm_mode = True
 
 
@@ -65,7 +65,7 @@ class StoreHouseBase(BaseModel):
 class StoreHouse(StoreHouseBase):
     id: int
 
-    class Congig:
+    class Config:
         orm_mode = True
 
 
@@ -80,7 +80,7 @@ class JournalInnerConsumeBase(BaseModel):
 class JournalInnerConsume(JournalInnerConsumeBase):
     id: int
 
-    class Congig:
+    class Config:
         orm_mode = True
 
 
@@ -123,6 +123,7 @@ class PrinterBase(BaseModel):
     is_free: Optional[bool] = False
     repairing: Optional[bool] = False
     location: Optional[str] = None
+
 
 class Printer(PrinterBase):
     id: int

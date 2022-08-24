@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from hp import crud
-from hp import schemas
-from hp.db import get_db
+from . import crud
+from . import schemas
+from .db import get_db
 
 hp_api_router = APIRouter(
     prefix='/API',
@@ -50,7 +50,7 @@ async def read_users(skip: int = 0, limit: int = 100,
     "/cartridge/{cartridge_id}")  # , response_model=schemas.Cartridge
 async def read_cartridge(cartridge_id: int,
                          db: AsyncSession = Depends(get_db)):
-    db_cartridge = await crud.get_cartridge(db, cartridge_id)
+    db_cartridge = await crud.get_cartridge_by_id(db, cartridge_id)
     if db_cartridge is None:
         raise HTTPException(status_code=404, detail="Cartridge is not found")
     return await db_cartridge
@@ -73,10 +73,11 @@ async def get_all_models_printer(db: AsyncSession = Depends(get_db)):
 
 @hp_api_router.put("/model_printer/", response_model=schemas.ModelPrinter)
 async def edit_model_printer(printer: schemas.ModelPrinter,
-                         db: AsyncSession = Depends(get_db)):
+                             db: AsyncSession = Depends(get_db)):
     db_model_printer = await crud.get_model_printer_by_id(db, printer.id)
     if db_model_printer is None:
-        raise HTTPException(status_code=404, detail="Model printer is not found")
+        raise HTTPException(status_code=404,
+                            detail="Model printer is not found")
     return await crud.update_model_printer(db, printer)
 
 
@@ -136,4 +137,4 @@ async def get_not_work_printer(db: AsyncSession = Depends(get_db)):
 async def create_history_printer(user_id: int,
                                  history: schemas.HistoryBase,
                                  db: AsyncSession = Depends(get_db)):
-    return await crud.create_history_printer(user_id, history, db)
+    return await crud.create_history_printer(db, user_id, history)

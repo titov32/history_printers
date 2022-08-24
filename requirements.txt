@@ -9,3 +9,5 @@ typer
 jinja2
 python-multipart
 openpyxl
+requests
+pytest

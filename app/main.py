@@ -11,7 +11,7 @@ app = FastAPI(title="History Printers",
               terms_of_service="http://example.com/terms/",
               contact={
                   "name": "Евгений Титов",
-                  #"url": "http://мой_юрл",
+                  # "url": "http://мой_юрл",
                   "email": "e.titov@stroyservis.com",
               })
 app.mount("/static", StaticFiles(directory="static"), name="static")

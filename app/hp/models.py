@@ -124,7 +124,7 @@ class Printer(Base):
                                  passive_deletes=True, )
 
     def __repr__(self):
-        return f'Printer id={self.id}, sn={self.sn}, department={self.department}'
+        return f'Printer id={self.id}, sn={self.sn}'
 
 
 class History(Base):
