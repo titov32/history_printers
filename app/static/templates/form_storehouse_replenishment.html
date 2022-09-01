@@ -1,0 +1,37 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+<p> {{cartridges}} </p>
+
+<h3>Изменение количесва на складе</h3>
+<form class="row g-3" method="post" id="form">
+    {% for cart in cartridges %}
+      <div class="col-sm-2">
+        <label for="{{cart.id}}" class="form-label">{{cart.number}}</label>
+        <input type="number" class="form-control" name="{{cart.id}}" id="{{cart.id}}" value="" >
+      </div>
+
+            {% endfor %}
+
+
+    <div class="col-md-3">
+        <label for="move" class="form-label"> Перемещение</label>
+        <select class="form-select" name="move" id="move" >
+              <option selected value="Поступление">Поступление</option>
+              <option>Передача в сервис</option>
+        </select>
+    </div>
+    <div class="col-12">
+    <button class="btn btn-primary" type="submit">Передача формы</button>
+  </div>
+</form>
+
+
+
+
+
+<script src="/static/scripts/getForm.js"> </script>
+{% endblock %}

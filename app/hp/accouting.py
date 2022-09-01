@@ -7,9 +7,8 @@ async def return_cartridge_from_departament(db: AsyncSession,
                                             cartridge: schemas.Cartridge):
     """Реализация возврата картриджа на заправку"""
 
-    #TODO Нужно отобразить транзакцию в журнале,
     # TODO понизить счетчик в CounterCartidge
-    #  TODO повысить счетчик в StoreHouse
+    # TODO повысить счетчик в StoreHouse
 
 
 async def replace_cartridge_departament(db: AsyncSession,

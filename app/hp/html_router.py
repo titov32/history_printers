@@ -357,3 +357,13 @@ async def get_storehouse(request: Request,
                "storehouse_used": sh_used
                }
     return templates.TemplateResponse("storehouse.html", context)
+
+
+@hp_html_router.get("/storehouse/replenishment", response_class=HTMLResponse)
+async def get_form_storehouse_replenishment(request: Request,
+                         db: AsyncSession = Depends(get_db)):
+    cartridges = await crud.get_cartridges(db)
+    context = {"request": request,
+               "cartridges": cartridges,
+               }
+    return templates.TemplateResponse("form_storehouse_replenishment.html", context)
