@@ -138,3 +138,22 @@ async def create_history_printer(user_id: int,
                                  history: schemas.HistoryBase,
                                  db: AsyncSession = Depends(get_db)):
     return await crud.create_history_printer(db, user_id, history)
+
+@hp_api_router.post("/storehouse/replenishment")  # , response_model=schemas.Printer)
+async def update_storehouse(positions: schemas.StoreHouseBase,
+                         db: AsyncSession = Depends(get_db)):
+    # db_printer = await crud.get_printer_by_sn(db, printer.sn)
+    # if db_printer:
+    #     raise HTTPException(status_code=400,
+    #                         detail="Printer already registered")
+    # printer_id = await crud.get_model_printer_by_id(db, id_=printer.model_id)
+    # if not printer_id:
+    #     raise HTTPException(status_code=400,
+    #                         detail='Model printer is not exist')
+    #
+    # created_printer = await crud.create_printer(db=db, printer=printer)
+    c = positions.cartridges
+    for i in c:
+        print(i)
+
+    return True

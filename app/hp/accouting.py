@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.hp import schemas
 from app.hp import crud
+from sqlalchemy import insert
+from . import models
 
 
 async def return_cartridge_from_departament(db: AsyncSession,
@@ -30,23 +32,28 @@ async def put_cartridge_departament_with_return(db: AsyncSession,
 
 
 async def shipment_of_cartridges(db: AsyncSession,
-                                    cartridge: schemas.Cartridge):
+                                 cartridge: schemas.Cartridge):
     # TODO нужно реализовать отправку картриджей на заправку
     pass
 
 
 async def receipt_of_cartridges(db: AsyncSession,
-                                        cartridges: [schemas.Cartridge]):
-    # TODO нужно реализовать прием картриджей с заправки
-    for cartridge in cartridges:
-        check_value = await crud.get_cartridge_in_store_house_by_cartridge_unused(db=db, unused=True, id=cartridge.id)
-        if check_value:
-            await crud.update_cartridge_in_storehouse(db=db, cartridge=cartridge, unused=True)
-        else:
-            await crud.create_cartridge_in_store_house(db=db, counter_cartridge=cartridge)
-    # TODO нужно повысить счетчики в StoreHouse
-    # TODO нужно отобразить JournalInnerConsume
+                                store_house_list: [schemas.ListCartridges]):
+    # # TODO нужно реализовать прием картриджей с заправки
+    # for cartridge in cartridges:
+    #     check_value = await crud.get_cartridge_in_store_house_by_cartridge_unused(db=db, unused=True, id=cartridge.id)
+    #     if check_value:
+    #         await crud.update_cartridge_in_storehouse(db=db, cartridge=cartridge, unused=True)
+    #     else:
+    #         await crud.create_cartridge_in_store_house(db=db, counter_cartridge=cartridge)
+    # # TODO нужно повысить счетчики в StoreHouse
+    # # TODO нужно отобразить JournalInnerConsume
 
+    # stmt = insert(models.StoreHouse).values(**store_house_list)
+    # stmt = stmt.on_conflict_do_update(
+    #     index_elements=[models.StoreHouse.c.id_cartridge, models.StoreHouse.c.unused],
+    #     set_=dict(amount=stmt.excluded.amount + models.StoreHouse.amount)
+    # )
     pass
 
 

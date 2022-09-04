@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from ipaddress import IPv4Interface
 from enum import Enum
@@ -56,10 +56,14 @@ class CounterCartridge(CounterCartridgeBase):
         orm_mode = True
 
 
-class StoreHouseBase(BaseModel):
-    id_cartridge: str
-    unused: bool
+class ListCartridges(BaseModel):
+    cartridges_id: int
     amount: int
+    unused: bool
+
+
+class StoreHouseBase(BaseModel):
+    cartridges: List[ListCartridges]
 
 
 class StoreHouse(StoreHouseBase):
