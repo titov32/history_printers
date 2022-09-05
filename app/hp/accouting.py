@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.hp import schemas
 from app.hp import crud
-from sqlalchemy import insert
-from . import models
 
+from . import models
+from sqlalchemy.dialects.postgresql import insert
 
 async def return_cartridge_from_departament(db: AsyncSession,
                                             cartridge: schemas.Cartridge):
@@ -48,13 +48,17 @@ async def receipt_of_cartridges(db: AsyncSession,
     #         await crud.create_cartridge_in_store_house(db=db, counter_cartridge=cartridge)
     # # TODO нужно повысить счетчики в StoreHouse
     # # TODO нужно отобразить JournalInnerConsume
-
-    # stmt = insert(models.StoreHouse).values(**store_house_list)
-    # stmt = stmt.on_conflict_do_update(
-    #     index_elements=[models.StoreHouse.c.id_cartridge, models.StoreHouse.c.unused],
-    #     set_=dict(amount=stmt.excluded.amount + models.StoreHouse.amount)
-    # )
-    pass
+    list_result = []
+    for record in store_house_list:
+        stmt = insert(models.StoreHouse).values(id_cartridge=record.cartridges_id,
+                                                amount=record.amount,
+                                                unused=record.unused)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[models.StoreHouse.id_cartridge, models.StoreHouse.unused],
+            set_=dict(amount=stmt.excluded.amount+models.StoreHouse.amount)
+        )
+        await db.execute(stmt)
+    return await db.commit()
 
 
 async def report_cartridgies_on_storehouse_unused(db: AsyncSession,

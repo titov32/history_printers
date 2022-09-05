@@ -38,10 +38,12 @@ class Department(Base):
     def __repr__(self):
         return f'{self.name} {self.company}'
 
+
 class Cartridge(Base):
     __tablename__ = 'cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
     number = sa.Column(sa.String, nullable=False)
+    reused = sa.Column(sa.Boolean, default=True)
     model_printers = orm.relationship('ModelPrinter',
                                       secondary=association_cartridge,
                                       back_populates='cartridges')
@@ -51,7 +53,7 @@ class CounterCartridge(Base):
     __tablename__ = 'counter_cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
     id_cartridge = sa.Column(sa.Integer,
-                         sa.ForeignKey('cartridge.id'))
+                             sa.ForeignKey('cartridge.id'))
     department_id = sa.Column(sa.Integer, sa.ForeignKey('department.id'))
     department = orm.relationship(Department, back_populates='cartridge_counters')
     amount = sa.Column(sa.Integer)
@@ -80,7 +82,7 @@ class StoreHouse(Base):
     unused = sa.Column(sa.Boolean)
     amount = sa.Column(sa.Integer)
     __table_args__ = (sa.UniqueConstraint('id_cartridge', 'unused',
-                                       name='_cartridge_unused'),)
+                                          name='_cartridge_unused'),)
 
 
 class ModelPrinter(Base):
@@ -95,7 +97,7 @@ class ModelPrinter(Base):
                                   secondary=association_cartridge,
                                   back_populates='model_printers')
     __table_args__ = (sa.UniqueConstraint('brand', 'model',
-                                       name='_brand_model'),)
+                                          name='_brand_model'),)
 
     def __repr__(self):
         return f'ModelPrinter={self.model}, brand="{self.brand}"'
@@ -109,7 +111,7 @@ class Printer(Base):
                          index=True)
     model_printer = orm.relationship('ModelPrinter', back_populates='printers')
     department_id = sa.Column(sa.Integer,
-                         sa.ForeignKey('department.id'))
+                              sa.ForeignKey('department.id'))
     department = orm.relationship(Department, back_populates='printers')
     ip = sa.Column(sa.String, default=None)
     sn = sa.Column(sa.String, unique=True, index=True)

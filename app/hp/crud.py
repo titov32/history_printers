@@ -358,10 +358,10 @@ async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,
     return response.first()
 
 
-async def get_all_cartridges_in_store_house(db: AsyncSession, used):
+async def get_all_cartridges_in_store_house(db: AsyncSession, unused):
     statement = select(models.StoreHouse, models.Cartridge.number) \
         .join(models.Cartridge) \
-        .where(models.StoreHouse.unused == used)
+        .where(models.StoreHouse.unused == unused)
     response = await db.execute(statement)
     return response.all()
 

@@ -349,9 +349,9 @@ async def create_department(name=Form(),
 async def get_storehouse(request: Request,
                          db: AsyncSession = Depends(get_db)):
     sh_unused = await crud.get_all_cartridges_in_store_house(db,
-                                                             used=False)
+                                                             unused=True)
     sh_used = await crud.get_all_cartridges_in_store_house(db,
-                                                           used=True)
+                                                           unused=False)
     context = {"request": request,
                "storehouse_unused": sh_unused,
                "storehouse_used": sh_used
