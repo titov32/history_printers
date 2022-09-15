@@ -17,10 +17,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        'printer',
-        sa.Column('location', sa.String), ),
-
+    # op.add_column(
+    #     'printer',
+    #     sa.Column('location', sa.String), ),
+    pass
 
 
 def downgrade() -> None:

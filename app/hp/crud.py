@@ -1,3 +1,4 @@
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from datetime import datetime
@@ -307,7 +308,7 @@ async def update_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
 
 
 async def delete_cartridge(db: AsyncSession, cartridge_id: int):
-    # TODO нужно проверить удаление картриджа
+    # TODO нужно обработать ошибку удаления картриджа находящихся на складе
     cartridge_delete = delete(models.Cartridge).where(
         models.Cartridge.id == cartridge_id). \
         execution_options(synchronize_session="fetch")
@@ -317,20 +318,20 @@ async def delete_cartridge(db: AsyncSession, cartridge_id: int):
 
 
 async def create_counter_cartridge(db: AsyncSession,
-                                   counter_cartridge: schemas.CounterCartridgeBase):
-    # TODO нужно реалзиовать создание записи картриджа
-    db_counter_cartridge = models.CounterCartridge(
-        departament=counter_cartridge.departament,
-        amount=counter_cartridge.amount)
-    db.add(db_counter_cartridge)
-    try:
-        await db.commit()
-    except Exception as e:
-        print(e)
-        await db.rollback()
-        raise
-    await db.refresh(db_counter_cartridge)
-    return db_counter_cartridge
+                                   counter_cartridge: [schemas.CounterCartridgeBase]):
+    # TODO нужно реализовать создание записи картриджа
+    for record in counter_cartridge:
+        stmt = insert(models.CounterCartridge) \
+            .values(id_cartridge=record.id_cartridge,
+                    amount=record.amount,
+                    department_id=record.department_id)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[models.CounterCartridge.id_cartridge,
+                            models.CounterCartridge.department_id],
+            set_=dict(amount=stmt.excluded.amount + models.CounterCartridge.amount)
+        )
+        await db.execute(stmt)
+    return await db.commit()
 
 
 async def create_cartridge_in_store_house(db: AsyncSession,

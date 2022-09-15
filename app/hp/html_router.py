@@ -273,10 +273,22 @@ async def get_all_cartridges(request: Request,
 
 @hp_html_router.post("/cartridges", response_class=HTMLResponse)
 async def create_cartridge(number=Form(),
+                           reused=Form(),
                            db: AsyncSession = Depends(get_db)):
-    cartridge = schemas.CartridgeBase(number=number)
+    if reused == "Да":
+        reused = True
+    else:
+        reused = False
+    cartridge = schemas.CartridgeBase(number=number, reused=reused)
     await crud.create_cartridge(db, cartridge)
     return RedirectResponse(url=f'/cartridges', status_code=302)
+
+
+@hp_html_router.get("/erase_cartridge/{id_}", response_class=HTMLResponse)
+async def delete_cartridge(id_: int,
+                           db: AsyncSession = Depends(get_db)):
+    await crud.delete_cartridge(db, id_)
+    return RedirectResponse("/cartridges")
 
 
 @hp_html_router.get("/cartridge_add/{id_}", response_class=HTMLResponse)
@@ -361,7 +373,7 @@ async def get_storehouse(request: Request,
 
 @hp_html_router.get("/storehouse/replenishment", response_class=HTMLResponse)
 async def get_form_storehouse_replenishment(request: Request,
-                         db: AsyncSession = Depends(get_db)):
+                                            db: AsyncSession = Depends(get_db)):
     cartridges = await crud.get_cartridges(db)
     context = {"request": request,
                "cartridges": cartridges,

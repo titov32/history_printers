@@ -23,7 +23,7 @@ function retrieveFormValue(event){
     if (Number.isInteger(+(val))){
         if (values[val]=='') continue
         else
-        cartridges.cartridges.push({'cartridges_id':parseInt(val), 'amount':parseInt(values[val]), 'unused':values.unused})}
+        cartridges.cartridges.push({'id_cartridge':parseInt(val), 'amount':parseInt(values[val]), 'unused':values.unused})}
     }
 
 

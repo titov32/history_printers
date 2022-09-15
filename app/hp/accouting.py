@@ -26,8 +26,10 @@ async def put_cartridge_departament(db: AsyncSession,
 
 
 async def put_cartridge_departament_with_return(db: AsyncSession,
-                                                cartridge: schemas.Cartridge):
-    # TODO нужно реализовать передачу картриджа на отделу c возвратом
+                                                cartridges: [schemas.CounterCartridgeBase]):
+    # TODO нужно реализовать передачу картриджа отделу c возвратом
+    # нужно повысить счетчик отдела и понизить счетчик на складе
+    await crud.create_counter_cartridge(db, counter_cartridge=cartridges)
     pass
 
 
@@ -39,18 +41,8 @@ async def shipment_of_cartridges(db: AsyncSession,
 
 async def receipt_of_cartridges(db: AsyncSession,
                                 store_house_list: [schemas.ListCartridges]):
-    # # TODO нужно реализовать прием картриджей с заправки
-    # for cartridge in cartridges:
-    #     check_value = await crud.get_cartridge_in_store_house_by_cartridge_unused(db=db, unused=True, id=cartridge.id)
-    #     if check_value:
-    #         await crud.update_cartridge_in_storehouse(db=db, cartridge=cartridge, unused=True)
-    #     else:
-    #         await crud.create_cartridge_in_store_house(db=db, counter_cartridge=cartridge)
-    # # TODO нужно повысить счетчики в StoreHouse
-    # # TODO нужно отобразить JournalInnerConsume
-    list_result = []
     for record in store_house_list:
-        stmt = insert(models.StoreHouse).values(id_cartridge=record.cartridges_id,
+        stmt = insert(models.StoreHouse).values(id_cartridge=record.id_cartridge,
                                                 amount=record.amount,
                                                 unused=record.unused)
         stmt = stmt.on_conflict_do_update(

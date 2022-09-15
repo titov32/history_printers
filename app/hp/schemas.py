@@ -34,6 +34,7 @@ class Departament(DepartmentBase):
 
 class CartridgeBase(BaseModel):
     number: str
+    reused: bool
 
 
 class Cartridge(CartridgeBase):
@@ -45,7 +46,7 @@ class Cartridge(CartridgeBase):
 
 class CounterCartridgeBase(BaseModel):
     id_cartridge: int
-    departament: int
+    department_id: int
     amount: int
 
 
@@ -57,7 +58,7 @@ class CounterCartridge(CounterCartridgeBase):
 
 
 class ListCartridges(BaseModel):
-    cartridges_id: int
+    id_cartridge: int
     amount: int
     unused: bool
 

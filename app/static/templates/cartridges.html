@@ -10,6 +10,7 @@
     <tr>
         <th scope="col"> <b> id </b> </th>
         <th scope="col"> <b> Название</b> </th>
+        <th scope="col"> <b> Переиспользуемый</b> </th>
 
     </tr>
     <tbody>
@@ -17,6 +18,8 @@
     <tr>
          <td> {{cartridge.id}} </td>
         <td> {{cartridge.number}} </td>
+        <td> {{cartridge.reused}} </td>
+        <td> <a href="/erase_cartridge/{{cartridge.id}}" > Удалить</a></td>
 
     </tr>
      {% endfor %}
@@ -30,7 +33,13 @@
     <label for="number" class="form-label">Номер расходного материала</label>
     <input type="text" class="form-control" name="number" id="number" value="" >
   </div>
-
+  <div class="col-md-3">
+    <label for="reused" class="form-label">Переиспользуемый</label>
+    <select class="form-select" name="reused" id="reused" >
+      <option selected value="Да">Да</option>
+      <option>Нет</option>
+    </select>
+  </div>
 
     <div class="col-12">
     <button class="btn btn-primary" type="submit">Отправить форму</button>

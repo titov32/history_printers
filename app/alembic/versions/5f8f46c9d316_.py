@@ -17,11 +17,9 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        'history',
-        sa.Column('path_file', sa.String), ),
+    pass
 
 
 
 def downgrade() -> None:
-    op.drop_column('history', 'path_file')
+    pass
