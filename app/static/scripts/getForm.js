@@ -22,13 +22,22 @@ function retrieveFormValue(event){
     for (val in values){
     if (Number.isInteger(+(val))){
         if (values[val]=='') continue
-        else
-        cartridges.cartridges.push({'id_cartridge':parseInt(val), 'amount':parseInt(values[val]), 'unused':values.unused})}
+        else{
+        if (values.operation === 'replenishment'){
+            values.unused = 'True'
+        }
+        else if (values.operation === 'transfer_to_service'){
+            values.unused = 'False'
+              }
+        cartridges.cartridges.push({'id_cartridge':parseInt(val),
+                                    'amount':parseInt(values[val]),
+                                    'unused':values.unused})}
+        }
     }
-
-
+    cartridges.operation = values.operation
+    console.log('values:', values)
 	console.log('v4', JSON.stringify(cartridges))
-	axios.post('http://127.0.0.1:8000/API/storehouse/replenishment', cartridges)
+	axios.post(window.location.origin + '/API/storehouse/replenishment', cartridges)
         .then((response) => {console.log(response.data);})
         .catch((error)=>{console.log(error);});
 

@@ -5,6 +5,7 @@ from . import crud
 from . import schemas
 from . import accouting
 from .db import get_db
+from .utils.converter import convert_from_depart_to_store
 
 hp_api_router = APIRouter(
     prefix='/API',
@@ -142,8 +143,29 @@ async def create_history_printer(user_id: int,
 
 
 @hp_api_router.post("/storehouse/replenishment")  # , response_model=schemas.Printer)
-async def update_storehouse(positions: schemas.StoreHouseBase,
+async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
                             db: AsyncSession = Depends(get_db)):
-    result = await accouting.receipt_of_cartridges(db, store_house_list=positions.cartridges)
+    if positions.operation == 'replenishment':
+        result = await accouting\
+            .receipt_of_cartridges(db, store_house_list=positions.cartridges)
+        return result
+    if positions.operation == 'transfer_to_service':
+        result = await accouting\
+            .shipment_of_cartridges(db, store_house_list=positions)
+        return result
 
-    return result
+
+@hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
+async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
+                                      db: AsyncSession = Depends(get_db)):
+
+    if positions.operation == 'return_from_department':
+        # up unused == false and down department
+        await accouting.receipt_of_cartridges(db,
+                                              convert_from_depart_to_store(positions,
+                                                                           unused=False,
+                                                                           operation='+'))
+
+    if positions.operation == 'transfer_to_department':
+        # down storehouse unused == True and up department
+        pass

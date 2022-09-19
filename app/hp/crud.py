@@ -308,7 +308,7 @@ async def update_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
 
 
 async def delete_cartridge(db: AsyncSession, cartridge_id: int):
-    # TODO нужно обработать ошибку удаления картриджа находящихся на складе
+    # TODO нужно обработать ошибку удаления картриджа находящихся на складе(в другой таблице)
     cartridge_delete = delete(models.Cartridge).where(
         models.Cartridge.id == cartridge_id). \
         execution_options(synchronize_session="fetch")
@@ -317,7 +317,7 @@ async def delete_cartridge(db: AsyncSession, cartridge_id: int):
     return {"delete cartridge_id": cartridge_id}
 
 
-async def create_counter_cartridge(db: AsyncSession,
+async def upsert_counter_cartridge(db: AsyncSession,
                                    counter_cartridge: [schemas.CounterCartridgeBase]):
     # TODO нужно реализовать создание записи картриджа
     for record in counter_cartridge:
@@ -334,19 +334,19 @@ async def create_counter_cartridge(db: AsyncSession,
     return await db.commit()
 
 
-async def create_cartridge_in_store_house(db: AsyncSession,
-                                          counter_cartridge: schemas.CounterCartridgeBase):
-    # TODO нужно реалзиовать создание записи картриджа
-    db_counter_cartridge = models.StoreHouse(**counter_cartridge.dict())
-    db.add(db_counter_cartridge)
-    try:
-        await db.commit()
-    except Exception as e:
-        print(e)
-        await db.rollback()
-        raise
-    await db.refresh(db_counter_cartridge)
-    return db_counter_cartridge
+async def upsert_in_store_house(db: AsyncSession,
+                                store_house_list: [schemas.StoreHouseBase]):
+    # TODO нужно реализовать создание записи картриджа
+    for record in store_house_list:
+        stmt = insert(models.StoreHouse).values(id_cartridge=record.id_cartridge,
+                                                amount=record.amount,
+                                                unused=record.unused)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[models.StoreHouse.id_cartridge, models.StoreHouse.unused],
+            set_=dict(amount=stmt.excluded.amount + models.StoreHouse.amount)
+        )
+        await db.execute(stmt)
+    return await db.commit()
 
 
 async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,
@@ -419,6 +419,13 @@ async def get_department_by_id(db: AsyncSession, id_: int):
     statement = select(models.Department).where(models.Department.id == id_)
     departments = await db.execute(statement)
     return departments.first()
+
+
+async def get_service_department(db: AsyncSession):
+    statement = select(models.Department.id)\
+        .where(models.Department.service == True)
+    departments = await db.execute(statement)
+    return departments.scalars().first()
 
 
 async def create_department(db: AsyncSession,

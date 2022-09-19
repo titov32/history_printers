@@ -350,10 +350,12 @@ async def get_all_departments(request: Request,
 @hp_html_router.post("/departments", response_class=HTMLResponse)
 async def create_department(name=Form(),
                             company=Form(),
+                            service=Form(),
                             db: AsyncSession = Depends(get_db)):
-    departament = schemas.DepartmentBase(name=name,
-                                         company=company)
-    await crud.create_department(db, departament)
+    department = schemas.DepartmentBase(name=name,
+                                        company=company,
+                                        service=service)
+    await crud.create_department(db, department)
     return RedirectResponse(url=f'/departments', status_code=302)
 
 

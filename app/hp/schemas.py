@@ -23,6 +23,7 @@ class User(UserBase):
 class DepartmentBase(BaseModel):
     name: str
     company: str
+    service: bool
 
 
 class Departament(DepartmentBase):
@@ -57,14 +58,20 @@ class CounterCartridge(CounterCartridgeBase):
         orm_mode = True
 
 
-class ListCartridges(BaseModel):
+class StoreHouseBase(BaseModel):
     id_cartridge: int
     amount: int
     unused: bool
 
 
-class StoreHouseBase(BaseModel):
-    cartridges: List[ListCartridges]
+class UpdateDepartmentCartridge(BaseModel):
+    operation: str
+    cartridges: List[CounterCartridgeBase]
+
+
+class UpdateStoreHouseBase(BaseModel):
+    operation: str
+    cartridges: List[StoreHouseBase]
 
 
 class StoreHouse(StoreHouseBase):

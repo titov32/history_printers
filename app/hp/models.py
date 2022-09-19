@@ -31,6 +31,7 @@ class Department(Base):
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String, nullable=False)
     company = sa.Column(sa.String, nullable=False)
+    service = sa.Column(sa.Boolean, default=False)
     printers = orm.relationship("Printer", back_populates='department')
     cartridge_counters = orm.relationship("CounterCartridge", back_populates='department')
     journal_inner_consume = orm.relationship("JournalInnerConsume", back_populates='department')
