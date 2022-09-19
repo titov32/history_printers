@@ -36,10 +36,11 @@ async def put_cartridge_departament_with_return(db: AsyncSession,
 
 async def shipment_of_cartridges(db: AsyncSession,
                                  store_house_list: schemas.UpdateStoreHouseBase):
-    # TODO нужно реализовать отправку картриджей на
+    # отправка картриджей на заправку
+    #Нужно обработать ошибку отсутствия сервисного отдела
     # up department_id==service and down unused==False
     service_depart = await crud.get_service_department(db)
-    print('1'*30)
+    print("!"*30)
     print(service_depart)
     depart_cartridge = convert_from_store_to_depart(schema=store_house_list,
                                                     department_id=service_depart,
@@ -47,8 +48,8 @@ async def shipment_of_cartridges(db: AsyncSession,
     await crud.upsert_counter_cartridge(db, depart_cartridge.cartridges)
     for item in store_house_list.cartridges:
         item.amount = -item.amount
+    print(store_house_list.cartridges)
     await crud.upsert_in_store_house(db, store_house_list.cartridges)
-    pass
 
 
 async def receipt_of_cartridges(db: AsyncSession,

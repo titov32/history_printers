@@ -15,7 +15,7 @@ hp_html_router = APIRouter(
     tags=['html'],
 )
 
-templates = Jinja2Templates(directory="static/templates")
+templates = Jinja2Templates(directory="app/static/templates")
 
 
 @hp_html_router.get("/", response_class=HTMLResponse)

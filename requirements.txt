@@ -11,3 +11,5 @@ python-multipart
 openpyxl
 requests
 pytest
+exifread
+geopy

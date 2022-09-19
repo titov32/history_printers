@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy import orm
-from config import DATABASEURL
+from app.config import DATABASEURL
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -6,10 +6,12 @@ from sqlalchemy import pool
 from alembic import context
 
 import os, sys
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#load_dotenv(os.path.join(BASE_DIR, ".env"))
+# load_dotenv(os.path.join(BASE_DIR, ".env"))
+path = r'C:\Users\e.titov\Documents\GitHub\history_printers'
+sys.path.append(path)
 sys.path.append(BASE_DIR)
 
 # this is the Alembic Config object, which provides

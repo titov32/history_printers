@@ -1,0 +1,27 @@
+import exifread
+from geopy.geocoders import Nominatim
+
+
+def format_lati_long(data):  # list2float
+    list_tmp = str(data).replace('[', '').replace(']', '').split(',')
+    list_ = [ele.strip() for ele in list_tmp]
+    data_sec = int(list_[-1].split('/')[0]) / (
+            int(list_[-1].split('/')[1]) * 3600)  # Значение секунд
+    data_minute = int(list_[1]) / 60
+    data_degree = int(list_[0])
+    result = data_degree + data_minute + data_sec
+    return result
+
+
+def get_address(foto: str) -> tuple:
+    img = exifread.process_file(open(foto, 'rb'))
+    latitude = format_lati_long(str(img['GPS GPSLatitude']))
+    longitude = format_lati_long(str(img['GPS GPSLongitude']))
+    geolocator = Nominatim(user_agent="Printers")
+    location = geolocator.reverse(f'{latitude}, {longitude}')
+    return location.address, latitude, longitude
+
+
+if __name__ == '__main__':
+    address, latd, long = get_address('gps.jpg')
+    print(f'address {address}, latitude {latd}, longitude {long}')

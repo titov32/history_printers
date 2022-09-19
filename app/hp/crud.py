@@ -319,7 +319,7 @@ async def delete_cartridge(db: AsyncSession, cartridge_id: int):
 
 async def upsert_counter_cartridge(db: AsyncSession,
                                    counter_cartridge: [schemas.CounterCartridgeBase]):
-    # TODO нужно реализовать создание записи картриджа
+    # реализация создания записи картриджа в отделе
     for record in counter_cartridge:
         stmt = insert(models.CounterCartridge) \
             .values(id_cartridge=record.id_cartridge,
@@ -336,7 +336,7 @@ async def upsert_counter_cartridge(db: AsyncSession,
 
 async def upsert_in_store_house(db: AsyncSession,
                                 store_house_list: [schemas.StoreHouseBase]):
-    # TODO нужно реализовать создание записи картриджа
+    # реализация создания записи картриджа на складе
     for record in store_house_list:
         stmt = insert(models.StoreHouse).values(id_cartridge=record.id_cartridge,
                                                 amount=record.amount,

@@ -1,5 +1,5 @@
 import qrcode
-from config import DOMAIN_NAME
+from app.config import DOMAIN_NAME
 
 
 def make_qr_code_by_path(path_to_printer_in_qr, name):

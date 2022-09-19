@@ -13,7 +13,7 @@ services:
     image: postgres
     restart: always
     environment:
-      - POSTGRES_PASSWORD='qwerty123'
+      - POSTGRES_PASSWORD='password'
       - POSTGRES_USER=prn
       - POSTGRES_DB=prn
     volumes:
