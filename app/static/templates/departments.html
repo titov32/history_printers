@@ -35,11 +35,22 @@
   <div class="col-md-4">
     <label for="company" class="form-label">Предприятие</label>
     <input type="text" class="form-control" name="company" id="company" value="" >
-  </div>
-    <div class="col-md-4">
-    <label for="service" class="form-check-label">Оказывает сервис?</label>
-    <input type="checkbox" class="form-check-input" name="service" id="service">
-  </div>
+ <div class="container-fluid">
+         <label> <b> Оказывает сервис?</b></label>
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="service" id="exampleRadios1" value="False" checked>
+  <label class="form-check-label" for="exampleRadios1">
+    Нет
+  </label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="service" id="exampleRadios2" value="True">
+  <label class="form-check-label" for="exampleRadios2">
+    Да
+  </label>
+</div>
+     </div>
 
     <div class="col-12">
     <button class="btn btn-primary" type="submit">Добавить отдел</button>

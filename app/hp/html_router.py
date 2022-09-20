@@ -366,9 +366,11 @@ async def get_storehouse(request: Request,
                                                              unused=True)
     sh_used = await crud.get_all_cartridges_in_store_house(db,
                                                            unused=False)
+    cartridges = await crud.get_cartridges(db)
     context = {"request": request,
                "storehouse_unused": sh_unused,
-               "storehouse_used": sh_used
+               "storehouse_used": sh_used,
+               "cartridges": cartridges,
                }
     return templates.TemplateResponse("storehouse.html", context)
 
@@ -381,3 +383,17 @@ async def get_form_storehouse_replenishment(request: Request,
                "cartridges": cartridges,
                }
     return templates.TemplateResponse("form_storehouse_replenishment.html", context)
+
+
+@hp_html_router.get("/counter_departs", response_class=HTMLResponse)
+async def get_storehouse(request: Request,
+                         db: AsyncSession = Depends(get_db)):
+    count_departs = await crud.get_all_cartridges_in_departments(db)
+    departments = await crud.get_departments(db)
+    cartridges = await crud.get_cartridges(db)
+    context = {"request": request,
+               "count_departs": count_departs,
+               "cartridges": cartridges,
+               "departments": departments
+               }
+    return templates.TemplateResponse("counter_department.html", context)

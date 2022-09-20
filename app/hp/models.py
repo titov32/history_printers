@@ -43,7 +43,7 @@ class Department(Base):
 class Cartridge(Base):
     __tablename__ = 'cartridge'
     id = sa.Column(sa.Integer, primary_key=True)
-    number = sa.Column(sa.String, nullable=False)
+    number = sa.Column(sa.String, nullable=False, unique=True)
     reused = sa.Column(sa.Boolean, default=True)
     model_printers = orm.relationship('ModelPrinter',
                                       secondary=association_cartridge,

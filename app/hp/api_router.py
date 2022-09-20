@@ -161,11 +161,8 @@ async def update_department_cartridge(positions: schemas.UpdateDepartmentCartrid
 
     if positions.operation == 'return_from_department':
         # up unused == false and down department
-        await accouting.receipt_of_cartridges(db,
-                                              convert_from_depart_to_store(positions,
-                                                                           unused=False,
-                                                                           operation='+'))
+        await accouting.return_cartridge_from_departament(db, positions)
 
-    if positions.operation == 'transfer_to_department':
-        # down storehouse unused == True and up department
-        pass
+    if positions.operation == 'transfer_to_department_with_return':
+        result = await accouting.put_cart_depart_with_return(db, positions)
+        return result

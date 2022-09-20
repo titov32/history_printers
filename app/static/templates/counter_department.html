@@ -4,50 +4,29 @@
 
 
 {% block content %}
+<p>
+    {{count_departs}}
 
-<h3> Не использованные картриджи</h3>
+</p>
+
+
+
+<h3> Картриджи по отделам</h3>
 <table class="table table-striped table-white">
     <thead class="thead-white">
 
     <tr>
         <th scope="col"> <b> id картриджа </b> </th>
-        <th scope="col"> <b> Готов к уптреблению</b> </th>
+        <th scope="col"> <b> Подразделение</b> </th>
         <th scope="col"> <b> Количество</b> </th>
 
     </tr>
     <tbody>
-    {% if storehouse_unused %}
-        {% for position in storehouse_unused %}
+    {% if count_departs %}
+        {% for position in count_departs %}
         <tr>
              <td> {{position[1]}} </td>
-            <td> {{position[0].unused}} </td>
-            <td> {{position[0].amount}} </td>
-
-        </tr>
-         {% endfor %}
-    {% else %}
-        <p> Склад пуст</p>
-    {% endif %}
-    </tbody>
-</table>
-
-
-<h3> Использованные картриджи</h3>
-<table class="table table-striped table-white">
-    <thead class="thead-white">
-
-    <tr>
-        <th scope="col"> <b> id картриджа </b> </th>
-        <th scope="col"> <b> Отработанные</b> </th>
-        <th scope="col"> <b> Количество</b> </th>
-
-    </tr>
-    <tbody>
-    {% if storehouse_used %}
-        {% for position in storehouse_used %}
-        <tr>
-             <td> {{position[1]}} </td>
-            <td> {{position[0].unused}} </td>
+            <td> {{position[0].department}} </td>
             <td> {{position[0].amount}} </td>
 
         </tr>
@@ -67,7 +46,7 @@
 </div>
 
 
-<h3>Изменение количества на складе</h3>
+<h3>Передача картриджа</h3>
 <form class="row g-3" method="post" id="form">
     {% for cart in cartridges %}
       <div class="col-sm-2">
@@ -77,12 +56,21 @@
 
             {% endfor %}
 
+  <div class="col-md-1">
+      <label for="department_id" class="department">Отдел</label>
+        <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="department_id" id="department_id" label=" Отдел">
+            {% for department in departments %}
+
+                 <option value={{department.id}}>{{department.name}}   <i>{{department.company}}</i> </option>
+            {% endfor %}
+        </select>
+  </div>
 
     <div class="col-md-3">
         <label for="operation" class="form-label"> Перемещение</label>
         <select class="form-select" name="operation" id="operation" >
-              <option selected value="replenishment">Поступление</option>
-              <option value="transfer_to_service">Передача в сервис</option>
+              <option selected value="transfer_to_department_with_return">Передача отделу</option>
+              <option value="return_from_department">Возврат картриджа(в разработке)</option>
         </select>
     </div>
     <div class="col-12">
