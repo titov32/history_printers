@@ -317,10 +317,10 @@ async def delete_cartridge(db: AsyncSession, cartridge_id: int):
     return {"delete cartridge_id": cartridge_id}
 
 
-async def upsert_counter_cartridge(db: AsyncSession,
-                                   counter_cartridge: [
+def upsert_counter_cartridge(counter_cartridge: [
                                        schemas.CounterCartridgeBase]):
     # реализация создания записи картриджа в отделе
+    records =[]
     for record in counter_cartridge:
         stmt = insert(models.CounterCartridge) \
             .values(id_cartridge=record.id_cartridge,
@@ -332,13 +332,13 @@ async def upsert_counter_cartridge(db: AsyncSession,
             set_=dict(
                 amount=stmt.excluded.amount + models.CounterCartridge.amount)
         )
-        await db.execute(stmt)
-    return await db.commit()
+        records.append(stmt)
+    return records
 
 
-async def upsert_in_store_house(db: AsyncSession,
-                                store_house_list: [schemas.StoreHouseBase]):
+def upsert_in_store_house(store_house_list: [schemas.StoreHouseBase]):
     # реализация создания записи картриджа на складе
+    records = []
     for record in store_house_list:
         stmt = insert(models.StoreHouse).values(
             id_cartridge=record.id_cartridge,
@@ -349,8 +349,9 @@ async def upsert_in_store_house(db: AsyncSession,
                             models.StoreHouse.unused],
             set_=dict(amount=stmt.excluded.amount + models.StoreHouse.amount)
         )
-        await db.execute(stmt)
-    return await db.commit()
+        records.append(stmt)
+
+    return records
 
 
 async def get_cartridge_in_store_house_by_cartridge_unused(db: AsyncSession,

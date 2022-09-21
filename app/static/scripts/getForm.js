@@ -38,7 +38,7 @@ function update_count_depart(values){
                 if (values.operation === 'transfer_to_department_with_return'){
                     values.unused = 'True'
                 }
-                else if (values.operation === 'transfer_to_service'){
+                else if (values.operation === 'return_from_department'){
                     values.unused = 'False'
                       }
                 cartridges.cartridges.push({'id_cartridge':parseInt(val),
@@ -70,12 +70,12 @@ function retrieveFormValue(event){
     if (values.operation === 'replenishment' || values.operation === 'transfer_to_service'){
             update_storehouse(values);
         }
-    if (values.operation === 'transfer_to_department_with_return'){
+    if (values.operation === 'transfer_to_department_with_return' || values.operation === 'return_from_department'){
             update_count_depart(values);
     }
-//    setTimeout(() => {
-//          document.location.reload();
-//        }, 3000);
+    setTimeout(() => {
+          document.location.reload();
+        }, 3000);
 
 }
 

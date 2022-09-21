@@ -146,11 +146,11 @@ async def create_history_printer(user_id: int,
 async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
                             db: AsyncSession = Depends(get_db)):
     if positions.operation == 'replenishment':
-        result = await accouting\
+        result = await accouting \
             .receipt_of_cartridges(db, store_house_list=positions.cartridges)
         return result
     if positions.operation == 'transfer_to_service':
-        result = await accouting\
+        result = await accouting \
             .shipment_of_cartridges(db, store_house_list=positions)
         return result
 

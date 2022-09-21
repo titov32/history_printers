@@ -48,6 +48,8 @@ class Cartridge(Base):
     model_printers = orm.relationship('ModelPrinter',
                                       secondary=association_cartridge,
                                       back_populates='cartridges')
+    counter_cartridges = orm.relationship("CounterCartridge",
+                                          back_populates='cartridge')
 
 
 class CounterCartridge(Base):
@@ -55,8 +57,11 @@ class CounterCartridge(Base):
     id = sa.Column(sa.Integer, primary_key=True)
     id_cartridge = sa.Column(sa.Integer,
                              sa.ForeignKey('cartridge.id'))
+    cartridge = orm.relationship('Cartridge',
+                                 back_populates='counter_cartridges')
     department_id = sa.Column(sa.Integer, sa.ForeignKey('department.id'))
-    department = orm.relationship(Department, back_populates='cartridge_counters')
+    department = orm.relationship(Department,
+                                  back_populates='cartridge_counters')
     amount = sa.Column(sa.Integer)
     __table_args__ = (sa.UniqueConstraint('id_cartridge', 'department_id',
                                           name='_cartridge_department'),)
@@ -69,7 +74,8 @@ class JournalInnerConsume(Base):
                              sa.ForeignKey('cartridge.id'))
     time_operation = sa.Column(sa.DateTime)
     department_id = sa.Column(sa.Integer, sa.ForeignKey('department.id'))
-    department = orm.relationship(Department, back_populates='journal_inner_consume')
+    department = orm.relationship(Department,
+                                  back_populates='journal_inner_consume')
     amount = sa.Column(sa.Integer)
     name = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
     unique_id_operation = sa.Column(sa.Integer)
