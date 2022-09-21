@@ -9,6 +9,8 @@ from .db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from .utils.xlsx import create_xlsx_file
+from .utils.foto import  get_address
+
 
 hp_html_router = APIRouter(
     prefix='',
@@ -172,17 +174,32 @@ async def create_record_for_printer(id_: int,
     user_id = 1
     if not files[0].filename:
         path_file = None
+        latitude = None
+        longitude = None
     else:
         files = [file for file in files]
         path_file = ''
         for file in files:
-            file_location = f"static/img/{file.filename}"
+            file_location = f"app/static/img/{file.filename}"
             path_file += file_location
             with open(file_location, "wb+") as file_object:
                 file_object.write(file.file.read())
+                try:
+                    coordinate = get_address(file_location)
+                    address = coordinate.get('address')
+                    latitude = coordinate.get('latitude')
+                    longitude = coordinate.get('longitude')
+                    # link = f'<a href="www.google.com/maps?q={latd},{long}">Показать на карте </a>'
+                    if address:
+                        description += f'Адрес: {address}'
+                except Exception as e:
+                    print(e)
+
     record = schemas.HistoryBase(description=description,
                                  printer_id=id_,
-                                 path_file=path_file)
+                                 path_file=path_file,
+                                 latitude=latitude,
+                                 longitude=longitude)
     await crud.create_history_printer(db, user_id, record)
 
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)

@@ -13,14 +13,20 @@ def format_lati_long(data):  # list2float
     return result
 
 
-def get_address(foto: str) -> tuple:
+def get_address(foto: str) -> dict:
     img = exifread.process_file(open(foto, 'rb'))
     latitude = format_lati_long(str(img['GPS GPSLatitude']))
     longitude = format_lati_long(str(img['GPS GPSLongitude']))
-    geolocator = Nominatim(user_agent="Printers")
-    location = geolocator.reverse(f'{latitude}, {longitude}')
-    return location.address, latitude, longitude
-
+    try:
+        geolocator = Nominatim(user_agent="Printers")
+        location = geolocator.reverse(f'{latitude}, {longitude}')
+        return {'address': location.address,
+                'latitude':latitude,
+                'longitude':longitude}
+    except Exception as e:
+        print(f'Exception while exctraxt foto {e}')
+        return {'latitude':latitude,
+                'longitude':longitude}
 
 if __name__ == '__main__':
     address, latd, long = get_address('gps.jpg')

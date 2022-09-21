@@ -39,6 +39,7 @@
         <strong>{{record[1].email}}.</strong>
         {{record[0].description}}
         {% if record[0].path_file %}
+        <a href="https://www.google.com/maps?q={{record[0].latitude}},{{record[0].longitude}}">Показать на карте </a>
         <img class="img-fluid" src="/{{record[0].path_file}}"   width="400" height="600"  alt="фото">
         {% endif %}
       </div>

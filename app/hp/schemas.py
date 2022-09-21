@@ -157,6 +157,8 @@ class HistoryBase(BaseModel):
     printer_id: int
     description: str
     path_file: Optional[str] = None
+    latitude: Optional[str] = None
+    longitude: Optional[str] = None
 
 
 class History(HistoryBase):
