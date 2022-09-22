@@ -1,6 +1,6 @@
 import exifread
 from geopy.geocoders import Nominatim
-
+from exif import Image
 
 def format_lati_long(data):  # list2float
     list_tmp = str(data).replace('[', '').replace(']', '').split(',')
@@ -29,5 +29,11 @@ def get_address(foto: str) -> dict:
                 'longitude':longitude}
 
 if __name__ == '__main__':
-    address, latd, long = get_address('gps.jpg')
-    print(f'address {address}, latitude {latd}, longitude {long}')
+    with open('gps.jpg', 'rb') as img:
+        image = Image(img)
+
+
+    print(f'has_exif {image.has_exif}')
+    print(f'exif ver {image.exif_version}')
+    print(dir(image))
+

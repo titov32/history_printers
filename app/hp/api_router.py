@@ -155,6 +155,7 @@ async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
         return result
 
 
+
 @hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
 async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
                                       db: AsyncSession = Depends(get_db)):
@@ -166,3 +167,6 @@ async def update_department_cartridge(positions: schemas.UpdateDepartmentCartrid
     if positions.operation == 'transfer_to_department_with_return':
         result = await accouting.put_cart_depart_with_return(db, positions)
         return result
+    if positions.operation == 'replace':
+        print(positions.operation)
+        await accouting.replace_cartridge_departament(db, positions)

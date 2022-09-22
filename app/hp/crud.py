@@ -264,6 +264,15 @@ async def get_cartridge_by_id(db: AsyncSession, cartridge_id: int):
     return cartridges.all()
 
 
+async def get_all_id_reused_cartridges(db: AsyncSession, list_id: list):
+    stmt = select(models.Cartridge.id) \
+        .where(models.Cartridge.reused==True) \
+        .where(models.Cartridge.id.in_(list_id))
+    print(stmt)
+    id_cartridges = await db.execute(stmt)
+    return id_cartridges.scalars().all()
+
+
 async def get_cartridges(db: AsyncSession):
     statement = select(models.Cartridge)
     cartridges = await db.execute(statement)
