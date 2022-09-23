@@ -349,7 +349,7 @@ async def get_form_add_cartridges_to_model(id_: int,
                                            cart=Form(),
                                            db: AsyncSession = Depends(
                                                get_db), ):
-    await crud.add_cart_for_model(db, model=id_, cart=int(cart))
+    await crud.upsert_cart_for_model(db, model=id_, cart=int(cart))
 
     return RedirectResponse(url=f'/models_printer', status_code=302)
 

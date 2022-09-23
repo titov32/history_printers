@@ -402,13 +402,17 @@ async def get_counter_by_cart_id_and_depart(db: AsyncSession, id_: int,
     return response.first()
 
 
-async def add_cart_for_model(db: AsyncSession, model: int, cart: int):
-    # TODO нужно переделать в upsert, нужно избавится от дублей при
-    #  добавление картриджей
-    ins = models.association_cartridge.insert().values(model_printer_id=model,
-                                                       cartridge_id=cart)
-    await db.execute(ins)
-    await db.commit()
+async def upsert_cart_for_model(db: AsyncSession, model: int, cart: int):
+    # реализация создания записи картриджа на складе
+    stmt = insert(models.association_cartridge).values(
+        model_printer_id=model,
+        cartridge_id=cart)
+    stmt = stmt.on_conflict_do_nothing(
+        index_elements=['model_printer_id',
+                        'cartridge_id'])
+    await db.execute(stmt)
+    return await db.commit()
+
 
 
 async def delete_cart_for_model(db: AsyncSession, model: int, cart: int):
