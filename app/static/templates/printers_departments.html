@@ -1,0 +1,50 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+<H1>Принтеры находящиеся в отделе: {{department.name}}  {{department.company}} </H1>
+
+<table class="table table-striped table-white">
+    <thead class="thead-white">
+
+    <tr>
+        <th scope="col"> <b> Марка </b> </th>
+        <th scope="col"> <b> Модель</b> </th>
+
+        <th scope="col"> <b>Местоположение / кабинет</b> </th>
+        <th scope="col"><b>IP</b> </th>
+        <th scope="col"><b>SN</b> </th>
+        <th scope="col"><b>В ходу</b> </th>
+        <th scope="col"><b>В резерве</b> </th>
+        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>QR</b> </th>
+    </tr>
+    <tbody>
+    {% for printer in printers %}
+    <tr>
+         <td> {{printer[1].brand}} </td>
+         <td> {{printer[1].model}} </td>
+
+        <td> {{printer[0].location}} </td>
+         <td> {{printer[0].ip}} </td>
+         <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
+         <td> {{printer[0].is_work}} </td>
+        <td> {{printer[0].is_free}} </td>
+        <td> {{printer[0].repairing}} </td>
+        <td> <img src="/{{printer[0].qr}}" width="100" height="100"
+     alt="QR"> </td>
+         <td> <a class="pressed-button"
+                 href="/erase_printer/{{printer[0].id}}"
+                 > удалить</a> </td>
+    </tr>
+     {% endfor %}
+    </tbody>
+</table>
+
+
+
+
+
+{% endblock %}

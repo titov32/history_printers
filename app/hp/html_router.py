@@ -9,8 +9,7 @@ from .db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from .utils.xlsx import create_xlsx_file
-from .utils.foto import  get_address
-
+from .utils.foto import get_address
 
 hp_html_router = APIRouter(
     prefix='',
@@ -147,13 +146,14 @@ async def get_all_printers_by_department(request: Request, department: int,
                                          db: AsyncSession = Depends(get_db)):
     printers = await crud.get_printers_by_departament(db,
                                                       department=department)
+    depart = await crud.get_department_by_id(db, department)
+    print()
+    print(f'printers: {printers}')
     context = {"request": request,
                "printers": printers,
-               "departament": department,
+               "department": depart,
                "printer_active": "active"}
-    # TODO проверить работу метода
-    return templates.TemplateResponse("printers_model_id.html", context
-                                      )
+    return templates.TemplateResponse("printers_departments.html", context)
 
 
 @hp_html_router.get("/erase_printer/{id_}", response_class=HTMLResponse)
@@ -189,7 +189,6 @@ async def create_record_for_printer(id_: int,
                     address = coordinate.get('address')
                     latitude = coordinate.get('latitude')
                     longitude = coordinate.get('longitude')
-                    # link = f'<a href="www.google.com/maps?q={latd},{long}">Показать на карте </a>'
                     if address:
                         description += f'Адрес: {address}'
                 except Exception as e:
@@ -301,6 +300,30 @@ async def create_cartridge(number=Form(),
     return RedirectResponse(url=f'/cartridges', status_code=302)
 
 
+@hp_html_router.get("/update_cartridge/{id_}", response_class=HTMLResponse)
+async def get_form_for_update_cartridge(request: Request, id_: int,
+                                        db: AsyncSession = Depends(get_db)):
+    cartridge = await crud.get_cartridge_by_id(db, id_)
+
+    context = {"request": request,
+               "cartridge": cartridge}
+    return templates.TemplateResponse("update_cartridge.html", context)
+
+
+@hp_html_router.post("/update_cartridge/{id_}", response_class=HTMLResponse)
+async def create_cartridge(id_: int,
+                           number=Form(),
+                           reused=Form(),
+                           db: AsyncSession = Depends(get_db)):
+    if reused == "Да":
+        reused = True
+    else:
+        reused = False
+    cartridge = schemas.Cartridge(number=number, reused=reused, id=id_)
+    await crud.update_cartridge(db, cartridge)
+    return RedirectResponse(url=f'/cartridges', status_code=302)
+
+
 @hp_html_router.get("/erase_cartridge/{id_}", response_class=HTMLResponse)
 async def delete_cartridge(id_: int,
                            db: AsyncSession = Depends(get_db)):
@@ -394,12 +417,14 @@ async def get_storehouse(request: Request,
 
 @hp_html_router.get("/storehouse/replenishment", response_class=HTMLResponse)
 async def get_form_storehouse_replenishment(request: Request,
-                                            db: AsyncSession = Depends(get_db)):
+                                            db: AsyncSession = Depends(
+                                                get_db)):
     cartridges = await crud.get_cartridges(db)
     context = {"request": request,
                "cartridges": cartridges,
                }
-    return templates.TemplateResponse("form_storehouse_replenishment.html", context)
+    return templates.TemplateResponse("form_storehouse_replenishment.html",
+                                      context)
 
 
 @hp_html_router.get("/counter_departs", response_class=HTMLResponse)

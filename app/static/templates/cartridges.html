@@ -19,7 +19,9 @@
          <td> {{cartridge.id}} </td>
         <td> {{cartridge.number}} </td>
         <td> {{cartridge.reused}} </td>
-        <td> <a href="/erase_cartridge/{{cartridge.id}}" > Удалить</a></td>
+        <td> <a href="/erase_cartridge/{{cartridge.id}}" > Удалить</a>
+            <a href="/update_cartridge/{{cartridge.id}}" > Обновить</a>
+        </td>
 
     </tr>
      {% endfor %}

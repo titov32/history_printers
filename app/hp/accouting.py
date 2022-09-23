@@ -30,24 +30,26 @@ async def return_cartridge_from_departament(db: AsyncSession,
 
 async def replace_cartridge_departament(db: AsyncSession,
                                         depart_cart_list: schemas.UpdateDepartmentCartridge):
-    # Реализация замены картриджа на заправку
-    # TODO Понизить счетчик в StoreHouse unused=True
-    #  повысить счетчик в StoreHouse unused=False только для переиспользуемых картриджей
-    sh_schema=convert_from_depart_to_store(depart_cart_list,
-                                           unused=True,
-                                           operation='-')
-    records=crud.upsert_in_store_house(sh_schema.cartridges)
+    # Реализация замены картриджа на заправку Понизить счетчик в StoreHouse
+    # unused=True повысить счетчик в StoreHouse unused=False только для
+    # переиспользуемых картриджей
+    sh_schema = convert_from_depart_to_store(depart_cart_list,
+                                             unused=True,
+                                             operation='-')
+    records = crud.upsert_in_store_house(sh_schema.cartridges)
 
     id_cart = []
     for cartridge in depart_cart_list.cartridges:
         id_cart.append(cartridge.id_cartridge)
 
     id_cart_reused = await crud.get_all_id_reused_cartridges(db, id_cart)
-    reused = schemas.UpdateDepartmentCartridge(operation=depart_cart_list.operation,
-                                               cartridges=[cartridge for cartridge in depart_cart_list.cartridges if cartridge.id_cartridge in id_cart_reused])
-    sh_schema=convert_from_depart_to_store(depart_cart_list,
-                                           unused=False,
-                                           operation='+')
+    reused = schemas.UpdateDepartmentCartridge(
+        operation=depart_cart_list.operation,
+        cartridges=[cartridge for cartridge in depart_cart_list.cartridges if
+                    cartridge.id_cartridge in id_cart_reused])
+    sh_schema = convert_from_depart_to_store(depart_cart_list,
+                                             unused=False,
+                                             operation='+')
     records.extend(crud.upsert_in_store_house(sh_schema.cartridges))
     result = await commit_record(db, records=records)
     print(result)

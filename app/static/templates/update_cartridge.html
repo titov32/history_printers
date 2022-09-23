@@ -1,0 +1,31 @@
+
+{% extends 'base.html' %}
+{% block title%} Картриджи {% endblock %}
+
+
+{% block content %}
+
+
+<p> {{cartridge}}</p>
+
+
+<h3> Рекдактирование картриджа </h3>
+<form class="row g-3" method="post">
+  <div class="col-md-4">
+    <label for="number" class="form-label">Номер расходного материала</label>
+    <input type="text" class="form-control" name="number" id="number" value="{{cartridge.number}}" >
+  </div>
+  <div class="col-md-3">
+    <label for="reused" class="form-label">Переиспользуемый</label>
+    <select class="form-select" name="reused" id="reused" >
+      <option selected value="Да">Да</option>
+      <option>Нет</option>
+    </select>
+  </div>
+
+    <div class="col-12">
+    <button class="btn btn-primary" type="submit">Отправить форму</button>
+  </div>
+</form>
+
+{% endblock %}

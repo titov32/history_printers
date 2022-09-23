@@ -261,7 +261,7 @@ async def get_cartridge_by_id(db: AsyncSession, cartridge_id: int):
     statement = select(models.Cartridge) \
         .where(models.Cartridge.id == cartridge_id)
     cartridges = await db.execute(statement)
-    return cartridges.all()
+    return cartridges.scalars().first()
 
 
 async def get_all_id_reused_cartridges(db: AsyncSession, list_id: list):
@@ -306,8 +306,7 @@ async def create_cartridge(db: AsyncSession, cartridge: schemas.CartridgeBase):
 
 
 async def update_cartridge(db: AsyncSession, cartridge: schemas.Cartridge):
-    # TODO нужно проверить обновление картриджа
-
+    # обновление картриджа
     statement = update(models.Cartridge) \
         .where(models.Cartridge.id == cartridge.id) \
         .values(cartridge.dict())
@@ -393,20 +392,6 @@ async def get_all_cartridges_in_departments(db: AsyncSession):
     return response.all()
 
 
-async def update_cartridge_in_storehouse(db: AsyncSession,
-                                         cartridge: schemas.Cartridge,
-                                         unused: bool):
-    # TODO нужно проверить обновление картриджа
-
-    statement = update(models.StoreHouse) \
-        .where(models.StoreHouse.id_cartridge == cartridge.id and
-               models.StoreHouse.unused == unused) \
-        .values(cartridge.dict())
-    await db.execute(statement)
-    await db.commit()
-    return cartridge.dict()
-
-
 async def get_counter_by_cart_id_and_depart(db: AsyncSession, id_: int,
                                             depart: int):
     statement = select(models.CounterCartridge). \
@@ -445,7 +430,7 @@ async def get_departments(db: AsyncSession):
 async def get_department_by_id(db: AsyncSession, id_: int):
     statement = select(models.Department).where(models.Department.id == id_)
     departments = await db.execute(statement)
-    return departments.first()
+    return departments.scalars().first()
 
 
 async def get_service_department(db: AsyncSession):
