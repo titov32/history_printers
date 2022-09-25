@@ -31,7 +31,7 @@ async def welcome(request: Request,
                'report_free_printers': report_free_printers,
                'main_active': 'active'
                }
-    return templates.TemplateResponse("index.html", context)
+    return templates.TemplateResponse("report_printers.html", context)
 
 
 @hp_html_router.get("/models_printer", response_class=HTMLResponse)

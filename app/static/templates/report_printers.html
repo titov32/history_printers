@@ -1,0 +1,75 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+
+
+<h1>Отчеты</h1>
+
+
+
+<h2> Принтеры </h2>
+
+<h3> Не рабочие принтеры</h3>
+<div class="container-sm">
+  <div class="row">
+{% for printer in report_dont_work_printers %}
+<div class="col">
+    <div class="card" style="width: 18rem;">
+        <img src="..." class="card-img-top" alt="">
+        <div class="card-body">
+            <h5 class="card-title">{{printer[1].brand}} {{printer[1].model}}</h5>
+            <p class="card-text"> {{printer[0].departament}}</p>
+            <p class="card-text"> {{printer[0].location}}</p>
+            <a href="/printer/{{printer[0].id}}" class="btn btn-primary">Подробнее</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+</div>
+
+<h3> Принтеры находящиеся в ремонте </h3>
+<div class="container-sm">
+  <div class="row">
+{% for printer in report_repairing_printers %}
+            <div class="col">
+            <div class="card" style="width: 18rem;">
+                <img src="..." class="card-img-top" alt="">
+                <div class="card-body">
+                    <h5 class="card-title">{{printer[1].brand}} {{printer[1].model}}</h5>
+                    <p class="card-text"> {{printer[0].departament}}</p>
+                    <p class="card-text"> {{printer[0].location}}</p>
+                    <a href="/printer/{{printer[0].id}}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+  </div>
+
+{% endfor %}
+</div>
+</div>
+
+<h3> Резерв принтеров </h3>
+<div class="container-sm">
+  <div class="row">
+{% for printer in report_free_printers %}
+            <div class="col">
+            <div class="card" style="width: 18rem;">
+                <img src="..." class="card-img-top" alt="">
+                <div class="card-body">
+                    <h5 class="card-title">{{printer[1].brand}} {{printer[1].model}}</h5>
+                    <p class="card-text"> {{printer[0].departament}}</p>
+                    <p class="card-text"> {{printer[0].location}}</p>
+                    <a href="/printer/{{printer[0].id}}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+  </div>
+
+{% endfor %}
+</div>
+</div>
+
+
+{% endblock %}
