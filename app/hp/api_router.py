@@ -155,11 +155,9 @@ async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
         return result
 
 
-
 @hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
 async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
                                       db: AsyncSession = Depends(get_db)):
-
     if positions.operation == 'return_from_department':
         # up unused == false and down department
         await accouting.return_cartridge_from_departament(db, positions)

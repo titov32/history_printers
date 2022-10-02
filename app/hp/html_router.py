@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from .utils.xlsx import create_xlsx_file
 from .utils.foto import get_address
-
+from .utils.logger import log_html_route
 hp_html_router = APIRouter(
     prefix='',
     tags=['html'],
@@ -45,23 +45,29 @@ async def get_all_models_printer(request: Request,
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
-async def create_model_printer(brand=Form(),
+async def create_model_printer( request: Request,
+        brand=Form(),
                                model=Form(),
                                type_p=Form(),
                                format_paper=Form(),
                                db: AsyncSession = Depends(get_db)):
+
     model = schemas.ModelPrinterCreate(brand=brand,
                                        model=model,
                                        type_p=type_p,
                                        format_paper=format_paper)
+    log_html_route.info(f'create model brand={brand}, model={model}')
     await crud.create_model(db, model)
     return RedirectResponse(url=f'/models_printer', status_code=302)
 
 
 @hp_html_router.get("/erase_model/{id_}", response_class=HTMLResponse)
 async def delete_printer(id_: int,
+                         request: Request,
                          db: AsyncSession = Depends(get_db)):
     await crud.delete_model_printer(db, id_)
+    log_html_route.info(f'erase model {id_}')
+    log_html_route.info(f'{request.client}')
     return RedirectResponse("/models_printer")
 
 

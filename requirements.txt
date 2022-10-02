@@ -13,3 +13,4 @@ requests
 pytest
 exifread
 geopy
+exif
