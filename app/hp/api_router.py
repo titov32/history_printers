@@ -7,10 +7,7 @@ from . import accouting
 from .db import get_db
 from .utils.converter import convert_from_depart_to_store
 
-hp_api_router = APIRouter(
-    prefix='/API',
-    tags=['API']
-)
+hp_api_router = APIRouter()
 
 
 @hp_api_router.post("/users/")  # , response_model=schemas.User)

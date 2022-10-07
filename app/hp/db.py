@@ -20,3 +20,8 @@ Base = orm.declarative_base(metadata=metadata)
 async def get_db() -> AsyncSession:
     async with async_session() as session:
         yield session
+
+
+async def create_db_and_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

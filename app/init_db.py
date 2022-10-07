@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from config import DATABASEURL, POSTGRESUSER, POSTGRESPASS, POSTGRESDB
-from hp import models
+from hp import models as models_hp
+from auth import models as models_auth
 from hp.models import Base
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
