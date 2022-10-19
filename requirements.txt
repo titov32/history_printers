@@ -15,3 +15,4 @@ exifread
 geopy
 exif
 fastapi-users[sqlalchemy]
+aiofiles

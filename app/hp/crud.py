@@ -4,6 +4,7 @@ from sqlalchemy import select, update, delete
 from datetime import datetime
 
 from . import models
+from app.auth import models as auth_models
 from . import schemas
 from .utils.qr import make_qr_code_by_path
 
@@ -196,10 +197,10 @@ async def get_printer_by_id(db: AsyncSession, id_: int):
 
 async def get_printer_by_id_with_history(db: AsyncSession, id_: int):
     statement = select(models.History,
-                       models.User) \
+                       auth_models.User) \
         .where(models.History.printer_id == id_) \
         .join(models.Printer) \
-        .join(models.User) \
+        .join(auth_models.User) \
         .order_by(models.History.date.desc())
     printers = await db.execute(statement)
     statement = select(models.ModelPrinter, models.Printer) \

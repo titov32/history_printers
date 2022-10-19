@@ -1,13 +1,19 @@
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.auth.models import User
+from app.auth.users import current_active_user
 from . import crud
 from . import schemas
 from . import accouting
 from .db import get_db
 from .utils.converter import convert_from_depart_to_store
 
-hp_api_router = APIRouter()
+hp_api_router = APIRouter(
+    prefix='/API',
+    tags=['API'],
+)
 
 
 @hp_api_router.post("/users/")  # , response_model=schemas.User)
@@ -132,14 +138,15 @@ async def get_not_work_printer(db: AsyncSession = Depends(get_db)):
     return printers
 
 
-@hp_api_router.post("/{user_id}/history")
-async def create_history_printer(user_id: int,
-                                 history: schemas.HistoryBase,
-                                 db: AsyncSession = Depends(get_db)):
-    return await crud.create_history_printer(db, user_id, history)
+@hp_api_router.post("/history")
+async def create_history_printer(history: schemas.HistoryBase,
+                                 db: AsyncSession = Depends(get_db),
+                                 user: User = Depends(current_active_user)):
+    return await crud.create_history_printer(db, user.id, history)
 
 
-@hp_api_router.post("/storehouse/replenishment")  # , response_model=schemas.Printer)
+@hp_api_router.post(
+    "/storehouse/replenishment")  # , response_model=schemas.Printer)
 async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
                             db: AsyncSession = Depends(get_db)):
     if positions.operation == 'replenishment':
@@ -152,13 +159,14 @@ async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
         return result
 
 
-
-@hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
-async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
-                                      db: AsyncSession = Depends(get_db)):
-
+@hp_api_router.post(
+    "/storehouse/department")  # , response_model=schemas.Printer)
+async def update_department_cartridge(
+        positions: schemas.UpdateDepartmentCartridge,
+        db: AsyncSession = Depends(get_db)):
     if positions.operation == 'return_from_department':
         # up unused == false and down department
+        # повышыем использованные и уменьшеаем кол-во у отдела
         await accouting.return_cartridge_from_departament(db, positions)
 
     if positions.operation == 'transfer_to_department_with_return':
@@ -167,3 +175,11 @@ async def update_department_cartridge(positions: schemas.UpdateDepartmentCartrid
     if positions.operation == 'replace':
         print(positions.operation)
         await accouting.replace_cartridge_departament(db, positions)
+
+
+@hp_api_router.post("/department/")  # , response_model=schemas.Printer)
+async def create_department(depart: schemas.DepartmentBase,
+                            db: AsyncSession = Depends(get_db)):
+
+    created_depart = await crud.create_department(db=db, department=depart)
+    return created_depart

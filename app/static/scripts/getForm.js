@@ -47,7 +47,17 @@ function update_count_depart(values){
         .then((response) => {console.log(response.data);})
         .catch((error)=>{console.log(error);});
 }
+function router(values){
+    if (values.operation === 'replenishment' || values.operation === 'transfer_to_service'){
+        update_storehouse(values);
+    }
+    if (values.operation === 'transfer_to_department_with_return' ||
+        values.operation === 'return_from_department' ||
+        values.operation === 'replace'){
+            update_count_depart(values);
+    }
 
+}
 
 function retrieveFormValue(event){
 	event.preventDefault();
@@ -61,17 +71,10 @@ function retrieveFormValue(event){
             values[name] = isCheckboxOrRadio(type) ? checked :value;
         }
     }
-    if (values.operation === 'replenishment' || values.operation === 'transfer_to_service'){
-            update_storehouse(values);
-        }
-    if (values.operation === 'transfer_to_department_with_return' ||
-        values.operation === 'return_from_department' ||
-        values.operation === 'replace'){
-            update_count_depart(values);
-    }
-    setTimeout(() => {
-          document.location.reload();
-        }, 3000);
+    router(values);
+//    setTimeout(() => {
+//          document.location.reload();
+//        }, 3000);
 
 }
 
