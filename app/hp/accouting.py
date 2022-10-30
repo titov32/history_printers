@@ -115,3 +115,47 @@ async def report_cartridges_with_model(db: AsyncSession,
                                        cartridge: schemas.Cartridge):
     # TODO нужно реализовать отчет по картриджам по моделям принтеров
     pass
+
+
+async def update_history_printer(db: AsyncSession,
+                                 printer_id: int,
+                                 description: str,
+                                 printer_new: schemas.PrinterUpdate,
+                                 user_id: str):
+    prn = await crud.get_printer_by_id(db, printer_id)
+    prn = prn[0]
+    printer_old = schemas.PrinterUpdate(department_id=prn.department_id,
+                                        ip=prn.ip,
+                                        sn=prn.sn,
+                                        is_work=prn.is_work,
+                                        is_free=prn.is_free,
+                                        repairing=prn.repairing,
+                                        model_id=prn.model_id,
+                                        id=prn.id,
+                                        location=prn.location, )
+    notice = ''
+    if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded:
+        notice += f'Принтер сменил IP адрес на {printer_new.ip} '
+    if printer_new.location != printer_old.location:
+        notice += f'Принтер перехал из {printer_old.location}' \
+                  f' в {printer_new.location} '
+    if printer_new.is_work != printer_old.is_work:
+        if printer_old.is_work:
+            notice += f'Принтер перестал работать '
+        else:
+            notice += f'Принтер заработал '
+    if printer_new.is_free != printer_old.is_free:
+        if printer_old.is_free:
+            notice += f'Принтер стал использоваться '
+        else:
+            notice += f'Принтер освободился'
+    if printer_new.repairing != printer_old.repairing:
+        if printer_old.repairing:
+            notice += f'Принтер отремонтирован '
+        else:
+            notice += f'Принтер уехал в ремонт '
+
+    notice = f'{description} {notice}'
+    record = schemas.HistoryBase(description=notice,
+                                 printer_id=printer_id)
+    await crud.update_printer_with_history(db, printer_new, record, user_id)

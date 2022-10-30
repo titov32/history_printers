@@ -1,21 +1,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy import orm
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 from sqlalchemy.future import select
 from .db import Base
-
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    histories = orm.relationship("History", back_populates="author")
-
-    def __repr__(self):
-        return f'UserID {self.id} UserEmail {self.email}'
 
 
 association_cartridge = sa.Table(
@@ -79,7 +68,7 @@ class JournalInnerConsume(Base):
     department = orm.relationship(Department,
                                   back_populates='journal_inner_consume')
     amount = sa.Column(sa.Integer)
-    name = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
+    name = sa.Column(UUID(as_uuid=True), sa.ForeignKey('user.id'))
     unique_id_operation = sa.Column(sa.Integer)
 
 
@@ -150,8 +139,8 @@ class History(Base):
     path_file = sa.Column(sa.String)
     latitude = sa.Column(sa.String)
     longitude = sa.Column(sa.String)
-    author_id = sa.Column(sa.Integer,
-                          sa.ForeignKey('users.id'),
+    author_id = sa.Column(UUID(as_uuid=True),
+                          sa.ForeignKey('user.id'),
                           index=True)
     author = orm.relationship('User', back_populates="histories")
 

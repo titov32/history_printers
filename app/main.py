@@ -4,6 +4,8 @@ from app.hp.api_router import hp_api_router
 from app.hp.html_router import hp_html_router
 from app.hp.utils.logger import logger
 
+from app.auth.router import auth_router
+from app.hp.db import create_db_and_tables
 
 
 app = FastAPI(title="History Printers",
@@ -20,6 +22,8 @@ app.mount("/app/static", StaticFiles(directory="app/static"), name="app/static")
 
 app.include_router(hp_api_router)
 app.include_router(hp_html_router)
+app.include_router(auth_router)
+
 
 @app.on_event("startup")
 async def on_startup():
@@ -30,3 +34,9 @@ async def on_startup():
 @app.on_event("shutdown")
 async def on_startup():
     logger.info('app shutdown')
+
+@app.on_event("startup")
+async def on_startup():
+    # Not needed if you setup a migration system like Alembic
+    await create_db_and_tables()
+

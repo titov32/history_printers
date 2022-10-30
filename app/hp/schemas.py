@@ -23,7 +23,7 @@ class User(UserBase):
 class DepartmentBase(BaseModel):
     name: str
     company: str
-    service: bool
+    service: bool=False
 
 
 class Departament(DepartmentBase):
