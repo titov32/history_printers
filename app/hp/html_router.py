@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 from . import crud
 from . import schemas
+from . import accouting
 from .db import get_db
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -171,7 +172,7 @@ async def create_record_for_printer(id_: int,
                                     db: AsyncSession = Depends(get_db)):
     # TODO Нужно заменить user_id
     # TODO Нужно обработать ошибку 404
-    user_id = 1
+    user_id = "1ae7329b-1fea-4d91-8127-2d290f7cea0c"
     if not files[0].filename:
         path_file = None
         latitude = None
@@ -226,18 +227,8 @@ async def update_printer(id_: int,
                          description=Form(),
                          location=Form()
                          ):
-    user_id = 1
-    prn = await crud.get_printer_by_id(db, id_)
-    prn = prn[0]
-    printer_old = schemas.PrinterUpdate(department_id=prn.department_id,
-                                        ip=prn.ip,
-                                        sn=prn.sn,
-                                        is_work=prn.is_work,
-                                        is_free=prn.is_free,
-                                        repairing=prn.repairing,
-                                        model_id=prn.model_id,
-                                        id=prn.id,
-                                        location=prn.location, )
+    user_id = "1ae7329b-1fea-4d91-8127-2d290f7cea0c"
+    prn = (await crud.get_printer_by_id(db, id_))[0]
     printer_new = schemas.PrinterUpdate(department_id=department,
                                         ip=ip,
                                         sn=prn.sn,
@@ -247,33 +238,11 @@ async def update_printer(id_: int,
                                         model_id=prn.model_id,
                                         id=id_,
                                         location=location)
-    notice = ''
-    if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded:
-        notice += f'Принтер сменил IP адрес на {printer_new.ip} '
-    if printer_new.location != printer_old.location:
-        notice += f'Принтер перехал из {printer_old.location}' \
-                  f' в {printer_new.location} '
-    if printer_new.is_work != printer_old.is_work:
-        if printer_old.is_work:
-            notice += f'Принтер перестал работать '
-        else:
-            notice += f'Принтер заработал '
-    if printer_new.is_free != printer_old.is_free:
-        if printer_old.is_free:
-            notice += f'Принтер стал использоваться '
-        else:
-            notice += f'Принтер освободился'
-    if printer_new.repairing != printer_old.repairing:
-        if printer_old.repairing:
-            notice += f'Принтер отремонтирован '
-        else:
-            notice += f'Принтер уехал в ремонт '
-
-    notice = f'{description} {notice}'
-    record = schemas.HistoryBase(description=notice,
-                                 printer_id=id_)
-    await crud.update_printer_with_history(db, printer_new, record, user_id)
-
+    await  accouting.update_history_printer(db,
+                                            printer_id=id_,
+                                            description=description,
+                                            printer_new=printer_new,
+                                            user_id=user_id)
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
 
 

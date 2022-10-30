@@ -145,6 +145,9 @@ async def create_history_printer(history: schemas.HistoryBase,
     return await crud.create_history_printer(db, user.id, history)
 
 
+
+
+
 @hp_api_router.post(
     "/storehouse/replenishment")  # , response_model=schemas.Printer)
 async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
