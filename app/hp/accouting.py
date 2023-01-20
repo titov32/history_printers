@@ -95,6 +95,7 @@ async def shipment_of_cartridges(db: AsyncSession,
 
 async def receipt_of_cartridges(db: AsyncSession,
                                 store_house_list: [schemas.StoreHouseBase]):
+    # Добавление картриджа на складе
     records = crud.upsert_in_store_house(store_house_list)
     await commit_record(db, records=records)
 

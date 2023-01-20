@@ -53,20 +53,22 @@
 
 
 <h3>Добавление информации по принтеру</h3>
-<form class="row g-3" action="/printer/{{printers[0][1].id}}" enctype="multipart/form-data" method="post">
+<form class="row g-3" action="/printer/{{printers[0][1].id}}"
+      enctype="multipart/form-data" method="post" id="form">
 
   <div class="col-md-3">
-      <label for="description" class="form-label">description </label>
+      <label for="description" class="form-label">Описание </label>
       <input type="text" class="form-control" name="description" id="description" value="Замечания по принтеру" >
   </div>
   <div class="mb-3">
-    <label for="formFile" class="form-label">Default file input example</label>
-    <input class="form-control" type="file" multiple id="formFile" name="files">
+    <label for="files" class="form-label">Добавление фото</label>
+    <input class="form-control" type="file"  id="files" name="files" multiple>
   </div>
 
     <div class="col-12">
-        <button class="btn btn-primary" type="submit">Добавить</button>
+        <button class="btn btn-primary" type="button" onclick="send_description()">Добавить</button>
     </div>
 </form>
 
+<script src="/app/static/scripts/getForm.js"> </script>
 {% endblock %}

@@ -51,6 +51,7 @@ async def create_model_printer(brand=Form(),
                                type_p=Form(),
                                format_paper=Form(),
                                db: AsyncSession = Depends(get_db)):
+    # TODO обработать ошибку повторяющих значений
     model = schemas.ModelPrinterCreate(brand=brand,
                                        model=model,
                                        type_p=type_p,
@@ -164,46 +165,46 @@ async def get_printer_with_history(id_: int,
     return RedirectResponse("/printers")
 
 
-@hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
-async def create_record_for_printer(id_: int,
-                                    description=Form(),
-                                    files: List[UploadFile] = File(
-                                        description="Multiple files as UploadFile"),
-                                    db: AsyncSession = Depends(get_db)):
-    # TODO Нужно заменить user_id
-    # TODO Нужно обработать ошибку 404
-    user_id = "1ae7329b-1fea-4d91-8127-2d290f7cea0c"
-    if not files[0].filename:
-        path_file = None
-        latitude = None
-        longitude = None
-    else:
-        files = [file for file in files]
-        path_file = ''
-        for file in files:
-            file_location = f"app/static/img/{file.filename}"
-            path_file += file_location
-            with open(file_location, "wb+") as file_object:
-                file_object.write(file.file.read())
-                try:
-                    coordinate = get_address(file_location)
-                    address = coordinate.get('address')
-                    latitude = coordinate.get('latitude')
-                    longitude = coordinate.get('longitude')
-                    if address:
-                        description += f'Адрес: {address}'
-                except Exception as e:
-                    print(e)
-
-    record = schemas.HistoryBase(description=description,
-                                 printer_id=id_,
-                                 path_file=path_file,
-                                 latitude=latitude,
-                                 longitude=longitude)
-    await crud.create_history_printer(db, user_id, record)
-
-    return RedirectResponse(url=f'/printer/{id_}', status_code=302)
-
+# @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
+# async def create_record_for_printer(id_: int,
+#                                     description=Form(),
+#                                     files: List[UploadFile] = File(
+#                                         description="Multiple files as UploadFile"),
+#                                     db: AsyncSession = Depends(get_db)):
+#     # TODO Нужно заменить user_id
+#     # TODO Нужно обработать ошибку 404
+#     user_id = "1ae7329b-1fea-4d91-8127-2d290f7cea0c"
+#     if not files[0].filename:
+#         path_file = None
+#         latitude = None
+#         longitude = None
+#     else:
+#         files = [file for file in files]
+#         path_file = ''
+#         for file in files:
+#             file_location = f"app/static/img/{file.filename}"
+#             path_file += file_location
+#             with open(file_location, "wb+") as file_object:
+#                 file_object.write(file.file.read())
+#                 try:
+#                     coordinate = get_address(file_location)
+#                     address = coordinate.get('address')
+#                     latitude = coordinate.get('latitude')
+#                     longitude = coordinate.get('longitude')
+#                     if address:
+#                         description += f'Адрес: {address}'
+#                 except Exception as e:
+#                     print(e)
+#
+#     record = schemas.HistoryBase(description=description,
+#                                  printer_id=id_,
+#                                  path_file=path_file,
+#                                  latitude=latitude,
+#                                  longitude=longitude)
+#     await crud.create_history_printer(db, user_id, record)
+#
+#     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
+#
 
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
 async def get_form_for_update_printer(request: Request, id_: int,

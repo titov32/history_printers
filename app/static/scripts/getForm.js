@@ -3,6 +3,8 @@ const isCheckboxOrRadio = type => ['checkbox', 'radio'].includes(type);
 const {form} = document.forms;
 
 function update_storehouse(values){
+        const TOKEN = localStorage.getItem('access_token');
+
         const cartridges = {cartridges:[]};
         for (val in values){
             if (Number.isInteger(+(val))){
@@ -21,20 +23,27 @@ function update_storehouse(values){
                 }
         }
     cartridges.operation = values.operation
+
     console.log('values:', values)
 	console.log('v4', JSON.stringify(cartridges))
-	axios.post(window.location.origin + '/API/storehouse/replenishment', cartridges)
+	url = window.location.origin + '/API/storehouse/replenishment';
+	data = cartridges;
+	config = {
+        headers: {'Authorization': `Bearer ${TOKEN}`}
+    };
+	axios.post(url, data, config)
         .then((response) => {console.log(response.data);})
         .catch((error)=>{console.log(error);});
 }
 
 function update_count_depart(values){
+        const TOKEN = localStorage.getItem('access_token');
         const cartridges = {cartridges:[]};
         for (val in values){
             if (Number.isInteger(+(val))){
                 if (values[val]=='')
                     continue
-                else{
+                else {
                 cartridges.cartridges.push({'id_cartridge':parseInt(val),
                                             'amount':parseInt(values[val]),
                                             'department_id':parseInt(values.department_id)})}
@@ -43,11 +52,49 @@ function update_count_depart(values){
     cartridges.operation = values.operation
     console.log('values:', values)
 	console.log('v4', JSON.stringify(cartridges))
-	axios.post(window.location.origin + '/API/storehouse/department', cartridges)
+	url = window.location.origin + '/API/storehouse/department';
+	data = cartridges;
+	config = {
+	    headers: {'Authorization': `Bearer ${TOKEN}`}
+	};
+	axios.post(url, data, config)
         .then((response) => {console.log(response.data);})
         .catch((error)=>{console.log(error);});
 }
+
+ function send_description() {
+    const TOKEN = localStorage.getItem('access_token');
+    printer_id = document.location.pathname.slice(9);
+    // получаем описание принтера из формы
+    var myForm = document.getElementById('form');
+    var qs = new URLSearchParams(new FormData(myForm));
+    description = qs.get('description');
+    // Заполняем поля для запроса
+    url = window.location.origin + '/API/uploadfile/'
+    config={
+            headers : {
+                'accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'multipart/form-data',
+        },
+            params:{
+                'printer_id': printer_id,
+                'description': description
+        },
+    };
+
+     axios.post(url, form, config)
+         .then(response => {
+            console.log(response.data);
+         })
+        .catch(error => {
+            console.error(error);
+         });
+     }
+
+
 function router(values){
+    console.log(`Переданные данные ${values}`)
     if (values.operation === 'replenishment' || values.operation === 'transfer_to_service'){
         update_storehouse(values);
     }
@@ -56,7 +103,10 @@ function router(values){
         values.operation === 'replace'){
             update_count_depart(values);
     }
-
+    else {
+        console.log('Нету данной информации');
+        console.log(values);
+    }
 }
 
 function retrieveFormValue(event){

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +9,7 @@ from . import schemas
 from . import accouting
 from .db import get_db
 from .utils.converter import convert_from_depart_to_store
+from typing import List
 
 hp_api_router = APIRouter(
     prefix='/API',
@@ -145,44 +146,69 @@ async def create_history_printer(history: schemas.HistoryBase,
     return await crud.create_history_printer(db, user.id, history)
 
 
-
-
-
 @hp_api_router.post(
     "/storehouse/replenishment")  # , response_model=schemas.Printer)
 async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
-                            db: AsyncSession = Depends(get_db)):
-    if positions.operation == 'replenishment':
-        result = await accouting \
-            .receipt_of_cartridges(db, store_house_list=positions.cartridges)
-        return result
-    if positions.operation == 'transfer_to_service':
-        result = await accouting \
-            .shipment_of_cartridges(db, store_house_list=positions)
-        return result
+                            db: AsyncSession = Depends(get_db),
+                            user: User = Depends(current_active_user)):
+    print(user)
+    if user.is_active:
+        if positions.operation == 'replenishment':
+            result = await accouting \
+                .receipt_of_cartridges(db,
+                                       store_house_list=positions.cartridges)
+            return result
+        if positions.operation == 'transfer_to_service':
+            result = await accouting \
+                .shipment_of_cartridges(db, store_house_list=positions)
+            return result
+    else:
+        raise HTTPException(status_code=403,
+                            detail="Forbidden, need right for this operation")
 
 
 @hp_api_router.post(
     "/storehouse/department")  # , response_model=schemas.Printer)
 async def update_department_cartridge(
         positions: schemas.UpdateDepartmentCartridge,
-        db: AsyncSession = Depends(get_db)):
-    if positions.operation == 'return_from_department':
-        # up unused == false and down department
-        # повышыем использованные и уменьшеаем кол-во у отдела
-        await accouting.return_cartridge_from_departament(db, positions)
+        db: AsyncSession = Depends(get_db),
+        user: User = Depends(current_active_user)):
+    if user.is_active:
+        if positions.operation == 'return_from_department':
+            # up unused == false and down department
+            # повышыем использованные и уменьшеаем кол-во у отдела
+            await accouting.return_cartridge_from_departament(db, positions)
 
-    if positions.operation == 'transfer_to_department_with_return':
-        result = await accouting.put_cart_depart_with_return(db, positions)
-        return result
-    if positions.operation == 'replace':
-        print(positions.operation)
-        await accouting.replace_cartridge_departament(db, positions)
+        if positions.operation == 'transfer_to_department_with_return':
+            result = await accouting.put_cart_depart_with_return(db, positions)
+            return result
+        if positions.operation == 'replace':
+            print(positions.operation)
+            await accouting.replace_cartridge_departament(db, positions)
+    else:
+        raise HTTPException(status_code=403,
+                            detail="Forbidden, need right for this operation")
 
 
 @hp_api_router.post("/department/")  # , response_model=schemas.Printer)
 async def create_department(depart: schemas.DepartmentBase,
                             db: AsyncSession = Depends(get_db)):
-
     created_depart = await crud.create_department(db=db, department=depart)
     return created_depart
+
+
+@hp_api_router.post("/uploadfile/")
+async def create_upload_file(history: schemas.HistoryBase = Depends(),
+                             files: List[UploadFile] = File(...),
+                             user: User = Depends(current_active_user)):
+    #TODO Нужно поменять endpoint на history и сделать запись в БД
+    if user.is_active:
+
+        return {
+            "user": user.email,
+            "JSON Payload ": history.dict(),
+            "Filenames": [file.filename for file in files],
+        }
+    else:
+        raise HTTPException(status_code=403,
+                            detail="Forbidden, need right for this operation")
