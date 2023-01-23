@@ -10,11 +10,85 @@ from . import accouting
 from .db import get_db
 from .utils.converter import convert_from_depart_to_store
 from typing import List
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 
 hp_api_router = APIRouter(
-    prefix='/API',
-    tags=['API'],
+    prefix='/API0',
+    tags=['API0'],
 )
+
+
+router = InferringRouter(tags=['API1'], prefix='/API1',)
+
+
+@cbv(router)
+class ModelCBV:
+    db: AsyncSession = Depends(get_db)
+
+    @router.post("/model_printer/", response_model=schemas.ModelPrinter)
+    async def create_model_printer(self, printer: schemas.ModelPrinterCreate):
+        db_model = await crud.get_printer_by_model(self.db, model=printer.model)
+        if db_model:
+            raise HTTPException(status_code=400, detail="Model already registered")
+        return await crud.create_model(db=self.db, printer=printer)
+
+    @router.get("/model_printer/all")
+    async def get_all_models_printer(self):
+        models = await crud.read_model_printers(self.db)
+        return models
+
+
+    @router.put("/model_printer/", response_model=schemas.ModelPrinter)
+    async def edit_model_printer(self, printer: schemas.ModelPrinter):
+        db_model_printer = await crud.get_model_printer_by_id(self.db, printer.id)
+        if db_model_printer is None:
+            raise HTTPException(status_code=404,
+                                detail="Model printer is not found")
+        return await crud.update_model_printer(self.db, printer)
+
+
+    @router.delete("/model_printer/{id_}")
+    async def remove_model_printer(self, id_: int):
+        return await crud.delete_model_printer(db=self.db, id_=id_)
+
+
+
+
+@cbv(router)
+class PrinterCBV:
+    db: AsyncSession = Depends(get_db)
+
+    @router.post("/printer/")  # , response_model=schemas.Printer)
+    async def create_printer(self, printer: schemas.PrinterCreate):
+        db_printer = await crud.get_printer_by_sn(self.db, printer.sn)
+        if db_printer:
+            raise HTTPException(status_code=400,
+                                detail="Printer already registered")
+        printer_id = await crud.get_model_printer_by_id(self.db, id_=printer.model_id)
+        if not printer_id:
+            raise HTTPException(status_code=400,
+                                detail='Model printer is not exist')
+        created_printer = await crud.create_printer(db=self.db, printer=printer)
+        return created_printer
+
+    @router.put("/printer/", response_model=schemas.Printer)
+    async def update_printer(self, printer: schemas.Printer):
+        db_printer = await crud.get_printer_by_id(self.db, printer.id)
+        if db_printer is None:
+            raise HTTPException(status_code=404, detail="Printer is not found")
+        return await crud.update_printer(self.db, printer)
+
+    @router.delete("/printer/")
+    async def delete_printer(self, printer: schemas.Printer,):
+        return await crud.delete_printer(self.db, printer.id)
+
+    @router.get("/printer/{printer_id}")
+    async def read_printer(self, printer_id: int,):
+        db_printer = await crud.get_printer_by_id_with_history(self.db, printer_id)
+        if db_printer is None:
+            raise HTTPException(status_code=404, detail="Printer is not found")
+        return db_printer
 
 
 @hp_api_router.post("/users/")  # , response_model=schemas.User)
@@ -62,75 +136,7 @@ async def read_cartridge(cartridge_id: int,
     return await db_cartridge
 
 
-@hp_api_router.post("/model_printer/", response_model=schemas.ModelPrinter)
-async def create_model_printer(printer: schemas.ModelPrinterCreate,
-                               db: AsyncSession = Depends(get_db)):
-    db_model = await crud.get_printer_by_model(db, model=printer.model)
-    if db_model:
-        raise HTTPException(status_code=400, detail="Model already registered")
-    return await crud.create_model(db=db, printer=printer)
 
-
-@hp_api_router.get("/model_printer/all")
-async def get_all_models_printer(db: AsyncSession = Depends(get_db)):
-    models = await crud.read_model_printers(db)
-    return models
-
-
-@hp_api_router.put("/model_printer/", response_model=schemas.ModelPrinter)
-async def edit_model_printer(printer: schemas.ModelPrinter,
-                             db: AsyncSession = Depends(get_db)):
-    db_model_printer = await crud.get_model_printer_by_id(db, printer.id)
-    if db_model_printer is None:
-        raise HTTPException(status_code=404,
-                            detail="Model printer is not found")
-    return await crud.update_model_printer(db, printer)
-
-
-@hp_api_router.delete("/model_printer/{id_}")
-async def remove_model_printer(id_: int,
-                               db: AsyncSession = Depends(get_db)):
-    return await crud.delete_model_printer(db=db, id_=id_)
-
-
-@hp_api_router.post("/printer/")  # , response_model=schemas.Printer)
-async def create_printer(printer: schemas.PrinterCreate,
-                         db: AsyncSession = Depends(get_db)):
-    db_printer = await crud.get_printer_by_sn(db, printer.sn)
-    if db_printer:
-        raise HTTPException(status_code=400,
-                            detail="Printer already registered")
-    printer_id = await crud.get_model_printer_by_id(db, id_=printer.model_id)
-    if not printer_id:
-        raise HTTPException(status_code=400,
-                            detail='Model printer is not exist')
-
-    created_printer = await crud.create_printer(db=db, printer=printer)
-
-    return created_printer
-
-
-@hp_api_router.put("/printer/", response_model=schemas.Printer)
-async def update_printer(printer: schemas.Printer,
-                         db: AsyncSession = Depends(get_db)):
-    db_printer = await crud.get_printer_by_id(db, printer.id)
-    if db_printer is None:
-        raise HTTPException(status_code=404, detail="Printer is not found")
-    return await crud.update_printer(db, printer)
-
-
-@hp_api_router.delete("/printer/")
-async def delete_printer(printer: schemas.Printer,
-                         db: AsyncSession = Depends(get_db)):
-    return await crud.delete_printer(db, printer.id)
-
-
-@hp_api_router.get("/printer/{printer_id}")
-async def read_printer(printer_id: int, db: AsyncSession = Depends(get_db)):
-    db_printer = await crud.get_printer_by_id_with_history(db, printer_id)
-    if db_printer is None:
-        raise HTTPException(status_code=404, detail="Printer is not found")
-    return db_printer
 
 
 @hp_api_router.get("/printer/not_work")
@@ -212,3 +218,19 @@ async def create_upload_file(history: schemas.HistoryBase = Depends(),
     else:
         raise HTTPException(status_code=403,
                             detail="Forbidden, need right for this operation")
+
+
+@hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
+async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
+                                      db: AsyncSession = Depends(get_db)):
+    if positions.operation == 'return_from_department':
+        # up unused == false and down department
+        await accouting.return_cartridge_from_departament(db, positions)
+
+    if positions.operation == 'transfer_to_department_with_return':
+        result = await accouting.put_cart_depart_with_return(db, positions)
+        return result
+    if positions.operation == 'replace':
+        print(positions.operation)
+        await accouting.replace_cartridge_departament(db, positions)
+

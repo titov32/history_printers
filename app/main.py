@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.hp.api_router import hp_api_router
+from app.hp.api_router import hp_api_router, router
 from app.hp.html_router import hp_html_router
 from app.auth.router import auth_router
 from app.hp.db import create_db_and_tables
@@ -17,6 +17,7 @@ app = FastAPI(title="History Printers",
               })
 app.mount("/app/static", StaticFiles(directory="app/static"), name="app/static")
 
+app.include_router(router)
 app.include_router(hp_api_router)
 app.include_router(hp_html_router)
 app.include_router(auth_router)

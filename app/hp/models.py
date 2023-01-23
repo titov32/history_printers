@@ -12,8 +12,8 @@ association_cartridge = sa.Table(
     Base.metadata,
     sa.Column('model_printer_id', sa.ForeignKey('model_printer.id')),
     sa.Column('cartridge_id', sa.ForeignKey('cartridge.id')),
-    __table_args__ = (sa.UniqueConstraint('model_printer_id', 'cartridge_id',
-                                          name='_model_printer_cartridge'),)
+    __table_args__=(sa.UniqueConstraint('model_printer_id', 'cartridge_id',
+                                        name='_model_printer_cartridge'),)
 )
 
 

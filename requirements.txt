@@ -1,6 +1,6 @@
 fastapi == 0.78
 sqlalchemy == 1.4.39
-asyncpg == 0.25
+asyncpg
 uvicorn[standard]
 alembic
 psycopg2-binary
@@ -14,5 +14,7 @@ pytest
 exifread
 geopy
 exif
+
 fastapi-users[sqlalchemy]
 aiofiles
+fastapi-utils
