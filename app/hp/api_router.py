@@ -223,6 +223,7 @@ async def create_upload_file(history: schemas.HistoryBase = Depends(),
 @hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
 async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
                                       db: AsyncSession = Depends(get_db)):
+
     if positions.operation == 'return_from_department':
         # up unused == false and down department
         await accouting.return_cartridge_from_departament(db, positions)
@@ -234,3 +235,10 @@ async def update_department_cartridge(positions: schemas.UpdateDepartmentCartrid
         print(positions.operation)
         await accouting.replace_cartridge_departament(db, positions)
 
+
+@hp_api_router.post("/department/")  # , response_model=schemas.Printer)
+async def create_department(depart: schemas.DepartmentBase,
+                            db: AsyncSession = Depends(get_db)):
+
+    created_depart = await crud.create_department(db=db, department=depart)
+    return created_depart

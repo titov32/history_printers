@@ -52,6 +52,7 @@ async def create_model_printer( request: Request,
                                type_p=Form(),
                                format_paper=Form(),
                                db: AsyncSession = Depends(get_db)):
+
     # TODO обработать ошибку повторяющих значений
 
     model = schemas.ModelPrinterCreate(brand=brand,
