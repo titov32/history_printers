@@ -26,4 +26,4 @@ def create_xlsx_file(response_sql):
                                f'{record[0].location}'
         ws[model_cell] = f'{record[0].model_printer.brand} ' \
                          f'{record[0].model_printer.model} '
-    wb.save('static/xlsx/printers.xlsx')
+    wb.save('app/static/xlsx/printers.xlsx')
