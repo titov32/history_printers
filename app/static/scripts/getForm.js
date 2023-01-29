@@ -70,7 +70,7 @@ function update_count_depart(values){
     var qs = new URLSearchParams(new FormData(myForm));
     description = qs.get('description');
     // Заполняем поля для запроса
-    url = window.location.origin + '/API/uploadfile/'
+    url = window.location.origin + '/API/history/'
     config={
             headers : {
                 'accept': 'application/json',
@@ -86,6 +86,7 @@ function update_count_depart(values){
      axios.post(url, form, config)
          .then(response => {
             console.log(response.data);
+            window.location.replace(window.location.origin + "/printer/" + printer_id);
          })
         .catch(error => {
             console.error(error);

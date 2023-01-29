@@ -12,14 +12,15 @@ from .utils.converter import convert_from_depart_to_store
 from typing import List
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from app.hp.utils.logger import log_api_route
+from .utils.foto import get_address
 
 hp_api_router = APIRouter(
     prefix='/API0',
     tags=['API0'],
 )
 
-
-router = InferringRouter(tags=['API1'], prefix='/API1',)
+router = InferringRouter(tags=['API'], prefix='/API', )
 
 
 @cbv(router)
@@ -38,7 +39,6 @@ class ModelCBV:
         models = await crud.read_model_printers(self.db)
         return models
 
-
     @router.put("/model_printer/", response_model=schemas.ModelPrinter)
     async def edit_model_printer(self, printer: schemas.ModelPrinter):
         db_model_printer = await crud.get_model_printer_by_id(self.db, printer.id)
@@ -47,12 +47,9 @@ class ModelCBV:
                                 detail="Model printer is not found")
         return await crud.update_model_printer(self.db, printer)
 
-
     @router.delete("/model_printer/{id_}")
     async def remove_model_printer(self, id_: int):
         return await crud.delete_model_printer(db=self.db, id_=id_)
-
-
 
 
 @cbv(router)
@@ -61,6 +58,7 @@ class PrinterCBV:
 
     @router.post("/printer/")  # , response_model=schemas.Printer)
     async def create_printer(self, printer: schemas.PrinterCreate):
+        # TODO разрешить только авторизированному пользователю
         db_printer = await crud.get_printer_by_sn(self.db, printer.sn)
         if db_printer:
             raise HTTPException(status_code=400,
@@ -74,17 +72,19 @@ class PrinterCBV:
 
     @router.put("/printer/", response_model=schemas.Printer)
     async def update_printer(self, printer: schemas.Printer):
+        # TODO разрешить только авторизированному пользователю
         db_printer = await crud.get_printer_by_id(self.db, printer.id)
         if db_printer is None:
             raise HTTPException(status_code=404, detail="Printer is not found")
         return await crud.update_printer(self.db, printer)
 
     @router.delete("/printer/")
-    async def delete_printer(self, printer: schemas.Printer,):
+    async def delete_printer(self, printer: schemas.Printer, ):
+        # TODO разрешить удалять принтеры только админу
         return await crud.delete_printer(self.db, printer.id)
 
     @router.get("/printer/{printer_id}")
-    async def read_printer(self, printer_id: int,):
+    async def read_printer(self, printer_id: int, ):
         db_printer = await crud.get_printer_by_id_with_history(self.db, printer_id)
         if db_printer is None:
             raise HTTPException(status_code=404, detail="Printer is not found")
@@ -136,20 +136,43 @@ async def read_cartridge(cartridge_id: int,
     return await db_cartridge
 
 
-
-
-
 @hp_api_router.get("/printer/not_work")
 async def get_not_work_printer(db: AsyncSession = Depends(get_db)):
     printers = await crud.get_report_printer_not_work(db)
     return printers
 
 
-@hp_api_router.post("/history")
-async def create_history_printer(history: schemas.HistoryBase,
-                                 db: AsyncSession = Depends(get_db),
-                                 user: User = Depends(current_active_user)):
-    return await crud.create_history_printer(db, user.id, history)
+@cbv(router)
+class HistoryCBV:
+    db: AsyncSession = Depends(get_db)
+
+    @router.post("/history")
+    async def create_history_printer(self,
+                                     history: schemas.HistoryBase = Depends(),
+                                     files: List[UploadFile] = File(...),
+                                     user: User = Depends(current_active_user)):
+        if user.is_active:
+            files = [file for file in files]
+            for file in files:
+                log_api_route.debug(f'files: {file}')
+                file_location = f"app/static/img/{file.filename}"
+                history.path_file = file_location
+                with open(file_location, "wb+") as file_object:
+                    file_object.write(file.file.read())
+                    try:
+                        coordinate = get_address(file_location)
+                        address = coordinate.get('address')
+                        history.latitude = coordinate.get('latitude')
+                        history.longitude = coordinate.get('longitude')
+                        if address:
+                            history.description += f'Адрес: {address}'
+                    except Exception as e:
+                        print(e)
+        else:
+            raise HTTPException(status_code=403,
+                                detail="Forbidden, need right for this operation")
+        log_api_route.info(f'Create record {user.email} ::: {history.description}')
+        return await crud.create_history_printer(self.db, user.id, history)
 
 
 @hp_api_router.post(
@@ -203,27 +226,9 @@ async def create_department(depart: schemas.DepartmentBase,
     return created_depart
 
 
-@hp_api_router.post("/uploadfile/")
-async def create_upload_file(history: schemas.HistoryBase = Depends(),
-                             files: List[UploadFile] = File(...),
-                             user: User = Depends(current_active_user)):
-    #TODO Нужно поменять endpoint на history и сделать запись в БД
-    if user.is_active:
-
-        return {
-            "user": user.email,
-            "JSON Payload ": history.dict(),
-            "Filenames": [file.filename for file in files],
-        }
-    else:
-        raise HTTPException(status_code=403,
-                            detail="Forbidden, need right for this operation")
-
-
 @hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
 async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
                                       db: AsyncSession = Depends(get_db)):
-
     if positions.operation == 'return_from_department':
         # up unused == false and down department
         await accouting.return_cartridge_from_departament(db, positions)
@@ -239,6 +244,5 @@ async def update_department_cartridge(positions: schemas.UpdateDepartmentCartrid
 @hp_api_router.post("/department/")  # , response_model=schemas.Printer)
 async def create_department(depart: schemas.DepartmentBase,
                             db: AsyncSession = Depends(get_db)):
-
     created_depart = await crud.create_department(db=db, department=depart)
     return created_depart
