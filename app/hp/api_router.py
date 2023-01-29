@@ -12,7 +12,7 @@ from .utils.converter import convert_from_depart_to_store
 from typing import List
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
-from app.hp.utils.logger import log_api_route
+from app.hp.utils.logger import log_api_route, logger
 from .utils.foto import get_address
 
 hp_api_router = APIRouter(
@@ -145,13 +145,13 @@ async def get_not_work_printer(db: AsyncSession = Depends(get_db)):
 @cbv(router)
 class HistoryCBV:
     db: AsyncSession = Depends(get_db)
+    user: User = Depends(current_active_user)
 
     @router.post("/history")
     async def create_history_printer(self,
                                      history: schemas.HistoryBase = Depends(),
-                                     files: List[UploadFile] = File(...),
-                                     user: User = Depends(current_active_user)):
-        if user.is_active:
+                                     files: List[UploadFile] = File(...),):
+        if self.user.is_active:
             files = [file for file in files]
             for file in files:
                 log_api_route.debug(f'files: {file}')
@@ -171,29 +171,43 @@ class HistoryCBV:
         else:
             raise HTTPException(status_code=403,
                                 detail="Forbidden, need right for this operation")
-        log_api_route.info(f'Create record {user.email} ::: {history.description}')
-        return await crud.create_history_printer(self.db, user.id, history)
+        log_api_route.info(f'Create record {self.user.email} ::: {history.description}')
+        return await crud.create_history_printer(self.db, self.user.id, history)
+
+    @router.put('/history/{printer_id}')
+    async def update_history_printer(self, printer_id: int, ):
+        pass
+
+    @router.delete('/history/{printer_id}')
+    async def erase_history_printer(self, printer_id: int, ):
+        pass
 
 
-@hp_api_router.post(
-    "/storehouse/replenishment")  # , response_model=schemas.Printer)
-async def update_storehouse(positions: schemas.UpdateStoreHouseBase,
-                            db: AsyncSession = Depends(get_db),
-                            user: User = Depends(current_active_user)):
-    print(user)
-    if user.is_active:
-        if positions.operation == 'replenishment':
-            result = await accouting \
-                .receipt_of_cartridges(db,
-                                       store_house_list=positions.cartridges)
-            return result
-        if positions.operation == 'transfer_to_service':
-            result = await accouting \
-                .shipment_of_cartridges(db, store_house_list=positions)
-            return result
-    else:
-        raise HTTPException(status_code=403,
-                            detail="Forbidden, need right for this operation")
+@cbv(router)
+class StoreHouseCBV:
+    db: AsyncSession = Depends(get_db)
+    user: User = Depends(current_active_user)
+
+    @router.post("/storehouse/replenishment")
+    async def update_storehouse(self,
+                                positions: schemas.UpdateStoreHouseBase,
+                                ):
+        logger.info(f'user post {self.user.email}')
+        if self.user.is_active:
+            if positions.operation == 'replenishment':
+                log_api_route.info(f'user {self.user.email} осуществил поступление картриджей {positions.cartridges}')
+                result = await accouting \
+                    .receipt_of_cartridges(self.db,
+                                           store_house_list=positions.cartridges)
+                return result
+            if positions.operation == 'transfer_to_service':
+                log_api_route.info(f'user {self.user.email} осуществил передачу в сервис {positions.cartridges}')
+                result = await accouting \
+                    .shipment_of_cartridges(self.db, store_house_list=positions)
+                return result
+        else:
+            raise HTTPException(status_code=403,
+                                detail="Forbidden, need right for this operation")
 
 
 @hp_api_router.post(
