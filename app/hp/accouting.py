@@ -83,6 +83,8 @@ async def shipment_of_cartridges(db: AsyncSession,
     # Нужно обработать ошибку отсутствия сервисного отдела
     # up department_id==service and down unused==False
     service_depart = await crud.get_service_department(db)
+    if not service_depart:
+        raise ValueError('Department "service" is not found')
     depart_cartridge = convert_from_store_to_depart(schema=store_house_list,
                                                     department_id=service_depart,
                                                     operation='+')
