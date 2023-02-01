@@ -279,6 +279,15 @@ async def get_cartridges(db: AsyncSession):
     cartridges = await db.execute(statement)
     return cartridges.scalars().all()
 
+async def get_cartridges_unlinked(db: AsyncSession, model_id):
+    statement = select(models.Cartridge)\
+        .select_from(models.association_cartridge)\
+        .join(models.Cartridge,
+              models.association_cartridge.c.cartridge_id != models.Cartridge.id) \
+        .where(models.association_cartridge.c.model_printer_id == model_id)
+
+    cartridges = await db.execute(statement)
+    return cartridges.scalars().all()
 
 async def get_cartridges_by_model_id(db: AsyncSession, model_id: int):
     st = select(models.Cartridge).select_from(models.association_cartridge) \
@@ -408,9 +417,7 @@ async def upsert_cart_for_model(db: AsyncSession, model: int, cart: int):
     stmt = insert(models.association_cartridge).values(
         model_printer_id=model,
         cartridge_id=cart)
-    stmt = stmt.on_conflict_do_nothing(
-        index_elements=['model_printer_id',
-                        'cartridge_id'])
+    stmt = stmt.on_conflict_do_nothing()
     await db.execute(stmt)
     return await db.commit()
 

@@ -307,9 +307,9 @@ async def delete_cartridge(id_: int,
 
 
 @hp_html_router.get("/cartridge_add/{id_}", response_class=HTMLResponse)
-async def get_form_add_cartridges_to_model(request: Request,
+async def get_form_add_cartridges_to_model(request: Request, id_,
                                            db: AsyncSession = Depends(get_db)):
-    cartridges = await crud.get_cartridges(db)
+    cartridges = await crud.get_cartridges_unlinked(db, model_id=int(id_))
 
     context = {"request": request,
                "cartridges": cartridges,
