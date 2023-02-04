@@ -55,6 +55,7 @@ class ModelCBV:
 @cbv(router)
 class PrinterCBV:
     db: AsyncSession = Depends(get_db)
+    user: User = Depends(current_active_user)
 
     @router.post("/printer/")  # , response_model=schemas.Printer)
     async def create_printer(self, printer: schemas.PrinterCreate):
@@ -73,7 +74,8 @@ class PrinterCBV:
         if not printer_id:
             raise HTTPException(status_code=400,
                                 detail='Model printer is not exist')
-        created_printer = await crud.create_printer(db=self.db, printer=printer)
+        if self.user.is_active:
+            created_printer = await crud.create_printer(db=self.db, printer=printer)
         return created_printer
 
     @router.put("/printer/", response_model=schemas.Printer)
@@ -218,8 +220,11 @@ class StoreHouseCBV:
                 return result
             if positions.operation == 'transfer_to_service':
                 log_api_route.info(f'user {self.user.email} осуществил передачу в сервис {positions.cartridges}')
-                result = await accouting \
-                    .shipment_of_cartridges(self.db, store_house_list=positions)
+                try:
+                    result = await accouting \
+                        .shipment_of_cartridges(self.db, store_house_list=positions)
+                except ValueError:
+                    raise HTTPException(status_code=400, detail='Department "service" is not found')
                 return result
         else:
             raise HTTPException(status_code=403,

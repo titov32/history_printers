@@ -2,6 +2,17 @@ const isCheckboxOrRadio = type => ['checkbox', 'radio'].includes(type);
 
 const {form} = document.forms;
 
+function handler_error(error){
+    if (error.response.status==401){
+            alert('Требуется авторизация');
+            window.location.replace(window.location.origin + "/login");
+            };
+            if (error.response.data.detail==='Department "service" is not found'){
+                alert("Отсутствует отдел сервиса")
+                }
+
+}
+
 function update_storehouse(values){
         const TOKEN = localStorage.getItem('access_token');
 
@@ -23,7 +34,6 @@ function update_storehouse(values){
                 }
         }
     cartridges.operation = values.operation
-
     console.log('values:', values)
 	console.log('v4', JSON.stringify(cartridges))
 	url = window.location.origin + '/API/storehouse/replenishment';
@@ -33,7 +43,8 @@ function update_storehouse(values){
     };
 	axios.post(url, data, config)
         .then((response) => {console.log(response.data);})
-        .catch((error)=>{console.log(error);});
+        .catch((error)=>{ handler_error(error); } )
+
 }
 
 function update_count_depart(values){
@@ -59,7 +70,7 @@ function update_count_depart(values){
 	};
 	axios.post(url, data, config)
         .then((response) => {console.log(response.data);})
-        .catch((error)=>{console.log(error);});
+        .catch((error)=>{ handler_error(error); } )
 }
 
  function send_description() {
@@ -88,9 +99,7 @@ function update_count_depart(values){
             console.log(response.data);
             window.location.replace(window.location.origin + "/printer/" + printer_id);
          })
-        .catch(error => {
-            console.error(error);
-         });
+        .catch((error)=>{ handler_error(error); } )
      }
 
  function update_printer() {
@@ -170,9 +179,9 @@ function retrieveFormValue(event){
         }
     }
     router(values);
-//    setTimeout(() => {
-//          document.location.reload();
-//        }, 3000);
+    setTimeout(() => {
+          document.location.reload();
+        }, 3000);
 
 }
 
