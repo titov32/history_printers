@@ -22,9 +22,8 @@
         <th scope="col"> <b>Отдел</b> </th>
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
-        <th scope="col"><b>В ходу</b> </th>
-        <th scope="col"><b>В резерве</b> </th>
-        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>Состояние</b> </th>
+
         <th scope="col"><b>QR</b> </th>
     </tr>
     <tbody>
@@ -35,9 +34,8 @@
          <td> <a href="/printers/department/{{printer[0].department_id}}"> {{printer[0].department.name}} </a>  </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
-         <td> {{printer[0].is_work}} </td>
-        <td> {{printer[0].is_free}} </td>
-        <td> {{printer[0].repairing}} </td>
+         <td> {{printer[0].condition}} </td>
+
         <td> <img src={{printer[0].qr}} width="100" height="100"
      alt="QR"> </td>
          <td> <a href="/erase_printer/{{printer[0].id}}"> удалить </a> </td>

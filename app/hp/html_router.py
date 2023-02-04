@@ -46,13 +46,12 @@ async def get_all_models_printer(request: Request,
 
 
 @hp_html_router.post("/models_printer", response_class=HTMLResponse)
-async def create_model_printer( request: Request,
-        brand=Form(),
+async def create_model_printer(request: Request,
+                               brand=Form(),
                                model=Form(),
                                type_p=Form(),
                                format_paper=Form(),
                                db: AsyncSession = Depends(get_db)):
-
     # TODO обработать ошибку повторяющих значений
 
     model = schemas.ModelPrinterCreate(brand=brand,
@@ -119,19 +118,19 @@ async def create_printer(model_id: int,
                          ip=Form(),
                          sn=Form(),
                          location=Form(),
-                         is_work=Form(),
-                         is_free=Form(),
-                         repairing=Form(),
+                         condition=Form(),
+                         connection=Form(),
                          db: AsyncSession = Depends(get_db)):
     # TODO Нужно проверить и обработать ошибку 404
+    if ip == '192.168.0.0' or connection == 'USB':
+        ip = None
     printer = schemas.PrinterCreate(model_id=model_id,
                                     department_id=department_id,
                                     ip=ip,
                                     sn=sn,
                                     location=location,
-                                    is_work=is_work,
-                                    is_free=is_free,
-                                    repairing=repairing
+                                    condition=condition,
+                                    connection=connection,
                                     )
     if await crud.get_printer_by_sn(db, sn):
         raise HTTPException(status_code=400, detail='Дубликат sn')
@@ -170,47 +169,6 @@ async def get_printer_with_history(id_: int,
     return RedirectResponse("/printers")
 
 
-# @hp_html_router.post("/printer/{id_}", response_class=HTMLResponse)
-# async def create_record_for_printer(id_: int,
-#                                     description=Form(),
-#                                     files: List[UploadFile] = File(
-#                                         description="Multiple files as UploadFile"),
-#                                     db: AsyncSession = Depends(get_db)):
-#     # TODO Нужно заменить user_id
-#     # TODO Нужно обработать ошибку 404
-#     user_id = "1ae7329b-1fea-4d91-8127-2d290f7cea0c"
-#     if not files[0].filename:
-#         path_file = None
-#         latitude = None
-#         longitude = None
-#     else:
-#         files = [file for file in files]
-#         path_file = ''
-#         for file in files:
-#             file_location = f"app/static/img/{file.filename}"
-#             path_file += file_location
-#             with open(file_location, "wb+") as file_object:
-#                 file_object.write(file.file.read())
-#                 try:
-#                     coordinate = get_address(file_location)
-#                     address = coordinate.get('address')
-#                     latitude = coordinate.get('latitude')
-#                     longitude = coordinate.get('longitude')
-#                     if address:
-#                         description += f'Адрес: {address}'
-#                 except Exception as e:
-#                     print(e)
-#
-#     record = schemas.HistoryBase(description=description,
-#                                  printer_id=id_,
-#                                  path_file=path_file,
-#                                  latitude=latitude,
-#                                  longitude=longitude)
-#     await crud.create_history_printer(db, user_id, record)
-#
-#     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
-#
-
 @hp_html_router.get("/update_printer/{id_}", response_class=HTMLResponse)
 async def get_form_for_update_printer(request: Request, id_: int,
                                       db: AsyncSession = Depends(get_db)):
@@ -227,9 +185,8 @@ async def update_printer(id_: int,
                          db: AsyncSession = Depends(get_db),
                          department=Form(),
                          ip=Form(),
-                         is_work=Form(),
-                         is_free=Form(),
-                         repairing=Form(),
+                         condition=Form(),
+                         connection=Form(),
                          description=Form(),
                          location=Form()
                          ):
@@ -238,17 +195,17 @@ async def update_printer(id_: int,
     printer_new = schemas.PrinterUpdate(department_id=department,
                                         ip=ip,
                                         sn=prn.sn,
-                                        is_work=is_work,
-                                        is_free=is_free,
-                                        repairing=repairing,
+                                        condition=condition,
+                                        connection=connection,
+
                                         model_id=prn.model_id,
                                         id=id_,
                                         location=location)
-    await  accouting.update_history_printer(db,
-                                            printer_id=id_,
-                                            description=description,
-                                            printer_new=printer_new,
-                                            user_id=user_id)
+    await accouting.update_history_printer(db,
+                                           printer_id=id_,
+                                           description=description,
+                                           printer_new=printer_new,
+                                           user_id=user_id)
     return RedirectResponse(url=f'/printer/{id_}', status_code=302)
 
 

@@ -115,7 +115,10 @@ async def delete_model_printer(db: AsyncSession, id_: int):
 
 
 async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
-    printer.ip = printer.ip.ip.exploded
+    if printer.ip:
+        printer.ip = printer.ip.ip.exploded
+    printer.condition = printer.condition.value
+    printer.connection= printer.connection.value
     db_printer = models.Printer(**printer.dict())
     db.add(db_printer)
     try:
@@ -240,15 +243,19 @@ async def create_history_printer(db: AsyncSession, user_id,
 
 
 async def update_printer_with_history(db: AsyncSession,
-                                      printer: schemas.PrinterUpdate,
+                                      printer: schemas.PrinterBase,
+                                      printer_id: int,
                                       description: schemas.HistoryBase,
-                                      user_id):
-    printer.ip = printer.ip.ip.exploded
+                                      user_id,):
+    if printer.ip:
+        printer.ip = printer.ip.ip.exploded
+    printer.condition = printer.condition.value
+    printer.connection= printer.connection.value
     db_history = models.History(**description.dict(), author_id=user_id,
                                 date=datetime.now())
 
     statement = update(models.Printer) \
-        .where(models.Printer.id == printer.id) \
+        .where(models.Printer.id == printer_id) \
         .values(printer.dict())
     await db.execute(statement)
     db.add(db_history)

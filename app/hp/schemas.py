@@ -126,14 +126,25 @@ class ModelPrinter(ModelPrinterBase):
         orm_mode = True
 
 
+class PrinterConditionEnum(Enum):
+    is_work = 'work'
+    in_repair = 'repair'
+    is_reserve = 'reserve'
+    require_repair = 'require_repair'
+
+
+class ConnectionEnum(Enum):
+    ip: str = 'ip'
+    usb: str = 'USB'
+
+
 class PrinterBase(BaseModel):
     model_id: int
     department_id: int
-    ip: Optional[IPv4Interface] = None
+    connection: ConnectionEnum = ConnectionEnum.usb
+    ip: Optional[IPv4Interface]
     sn: str
-    is_work: Optional[bool] = True
-    is_free: Optional[bool] = False
-    repairing: Optional[bool] = False
+    condition: PrinterConditionEnum = PrinterConditionEnum.is_work
     location: Optional[str] = None
 
 
@@ -149,9 +160,9 @@ class PrinterCreate(PrinterBase):
     pass
 
 
-class PrinterUpdate(PrinterBase):
-    id: int
-
+class PrinterUpdate(BaseModel):
+    description: Optional[str] = None
+    printer: PrinterCreate
 
 class HistoryBase(BaseModel):
     printer_id: int

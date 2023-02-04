@@ -15,13 +15,15 @@
   {% endif %}
 
   <p> sn принтера: {{printers[0][1].sn}}</p>
-  <p> Отдел: {{printers[0][1].departament}}</p>
-  {% if printers[0][1].is_work %} Принтер сейчас в работе
+    <p> Тип подключения: {{printers[0][1].connection}}</p>
+  <p> Отдел: {{printers[0][1].department.name}}</p>
+  {% if printers[0][1].condition == 'work' %} Принтер сейчас в работе
+  {% elif printers[0][1].condition == 'repair' %} Принтер сейчас в ремонте
+  {% elif printers[0][1].condition == 'reserve' %} Принтер сейчас в резерве
+  {% elif printers[0][1].condition == 'require_repair' %} Принтер сейчас в требует ремонта
+
   {% endif %}
-  {% if printers[0][1].is_free %} Принтер сейчас свободен
-  {% endif %}
-  {% if printers[0][1].repairing %} Принтер сейчас в ремонте
-  {% endif %}
+
 </div>
 <a class="btn btn-secondary" href="/update_printer/{{printers[0][1].id}}" role="button">Обновить информацию по принтеру</a>
 <div class="accordion" id="accordionPanelsStayOpenExample">

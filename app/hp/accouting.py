@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from .utils.converter import convert_from_store_to_depart, \
     convert_from_depart_to_store
@@ -120,43 +122,38 @@ async def report_cartridges_with_model(db: AsyncSession,
 
 async def update_history_printer(db: AsyncSession,
                                  printer_id: int,
-                                 description: str,
-                                 printer_new: schemas.PrinterUpdate,
-                                 user_id: str):
+                                 printer_update: schemas.PrinterUpdate,
+                                 user_id: UUID):
     prn = await crud.get_printer_by_id(db, printer_id)
     prn = prn[0]
-    printer_old = schemas.PrinterUpdate(department_id=prn.department_id,
-                                        ip=prn.ip,
-                                        sn=prn.sn,
-                                        is_work=prn.is_work,
-                                        is_free=prn.is_free,
-                                        repairing=prn.repairing,
-                                        model_id=prn.model_id,
-                                        id=prn.id,
-                                        location=prn.location, )
+    printer_new = printer_update.printer
+    printer_old = schemas.PrinterBase(department_id=prn.department_id,
+                                      ip=prn.ip,
+                                      sn=prn.sn,
+                                      connection=prn.connection,
+                                      condition=prn.condition,
+                                      model_id=prn.model_id,
+                                      location=prn.location, )
     notice = ''
-    if printer_new.ip.ip.exploded != printer_old.ip.ip.exploded:
-        notice += f'Принтер сменил IP адрес на {printer_new.ip} '
+
     if printer_new.location != printer_old.location:
         notice += f'Принтер перехал из {printer_old.location}' \
                   f' в {printer_new.location} '
-    if printer_new.is_work != printer_old.is_work:
-        if printer_old.is_work:
-            notice += f'Принтер перестал работать '
+    if printer_new.connection != printer_old.connection:
+        if printer_new.connection == 'USB':
+            notice += f'Принтер переключили на USB '
         else:
-            notice += f'Принтер заработал '
-    if printer_new.is_free != printer_old.is_free:
-        if printer_old.is_free:
-            notice += f'Принтер стал использоваться '
-        else:
-            notice += f'Принтер освободился'
-    if printer_new.repairing != printer_old.repairing:
-        if printer_old.repairing:
-            notice += f'Принтер отремонтирован '
-        else:
-            notice += f'Принтер уехал в ремонт '
+            notice += f'Принтер подключили к ЛВС'
+    if printer_new.ip:
+        notice += f'Принтер получил IP адрес на {printer_new.ip} '
+    if printer_new.condition != printer_old.condition:
+        notice += f'Принтер стал изменил состояние на {printer_new.condition.value} '
 
-    notice = f'{description} {notice}'
+    notice = f'{printer_update.description} {notice}'
     record = schemas.HistoryBase(description=notice,
                                  printer_id=printer_id)
-    await crud.update_printer_with_history(db, printer_new, record, user_id)
+    return await crud.update_printer_with_history(db,
+                                           printer_new,
+                                           printer_id,
+                                           record,
+                                           user_id)

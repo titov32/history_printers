@@ -16,9 +16,8 @@
         <th scope="col"> <b>Местоположение / кабинет</b> </th>
         <th scope="col"><b>IP</b> </th>
         <th scope="col"><b>SN</b> </th>
-        <th scope="col"><b>В ходу</b> </th>
-        <th scope="col"><b>В резерве</b> </th>
-        <th scope="col"><b>В ремонте</b> </th>
+        <th scope="col"><b>Состояние</b> </th>
+        <th scope="col"><b>Тип подключения</b> </th>
         <th scope="col"><b>QR</b> </th>
     </tr>
     <tbody>
@@ -30,9 +29,8 @@
         <td> {{printer[0].location}} </td>
          <td> {{printer[0].ip}} </td>
          <td><a href="/printer/{{printer[0].id}}"> {{printer[0].sn}}</a>  </td>
-         <td> {{printer[0].is_work}} </td>
-        <td> {{printer[0].is_free}} </td>
-        <td> {{printer[0].repairing}} </td>
+         <td> {{printer[0].condition}} </td>
+        <td> {{printer[0].connection}} </td>
         <td> <img src="/{{printer[0].qr}}" width="100" height="100"
      alt="QR"> </td>
          <td> <a class="pressed-button"
@@ -68,27 +66,24 @@
       <label for="sn" class="form-label">Серийный номер</label>
       <input type="text" class="form-control" name="sn" id="sn" value="abcd1234" required>
   </div>
-  <div class="col-md-3">
-        <label for="is_work" class="form-label">В работе</label>
-        <select class="form-select" name="is_work" id="is_work" >
-          <option selected value="true">true</option>
-          <option>false</option>
+      <div class="col-md-3">
+        <label for="condition" class="form-label">Текущее состояние</label>
+        <select class="form-select" name="condition" id="condition" >
+          <option selected value="work">В работе </option>
+          <option value="repair">В ремонте</option>
+          <option value="reserve">Резерв</option>
+          <option value="require_repair">Требует ремонта </option>
         </select>
   </div>
-    <div class="col-md-3">
-        <label for="is_free" class="form-label">Свободен</label>
-        <select class="form-select" name="is_free" id="is_free" >
-          <option selected value="false">false</option>
-          <option>true</option>
+  </div>
+      <div class="col-md-3">
+        <label for="connection" class="form-label">Тип подключения</label>
+        <select class="form-select" name="connection" id="connection" >
+          <option selected value="ip">IP </option>
+          <option  value="USB">USB</option>
+
         </select>
-    </div>
-    <div class="col-md-3">
-        <label for="repairing" class="form-label">В ремонте</label>
-        <select class="form-select" name="repairing" id="repairing" >
-              <option selected value="true">true</option>
-              <option>false</option>
-        </select>
-    </div>
+  </div>
     <div class="col-12">
     <button class="btn btn-primary" type="submit">Создать принтер</button>
   </div>

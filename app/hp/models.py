@@ -110,12 +110,13 @@ class Printer(Base):
     model_printer = orm.relationship('ModelPrinter', back_populates='printers')
     department_id = sa.Column(sa.Integer,
                               sa.ForeignKey('department.id'))
-    department = orm.relationship(Department, back_populates='printers')
+    department = orm.relationship(Department,
+                                  back_populates='printers',
+                                  lazy="joined")
+    connection = sa.Column(sa.String, default='USB')
     ip = sa.Column(sa.String, default=None)
     sn = sa.Column(sa.String, unique=True, index=True)
-    is_work = sa.Column(sa.Boolean, default=True)
-    is_free = sa.Column(sa.Boolean, default=False)
-    repairing = sa.Column(sa.Boolean, default=True)
+    condition = sa.Column(sa.String)
     qr = sa.Column(sa.String)
     location = sa.Column(sa.String)
     histories = orm.relationship('History',

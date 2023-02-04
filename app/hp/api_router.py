@@ -64,6 +64,12 @@ class PrinterCBV:
             raise HTTPException(status_code=400,
                                 detail="Printer already registered")
         printer_id = await crud.get_model_printer_by_id(self.db, id_=printer.model_id)
+        if printer.connection.usb and printer.ip:
+            raise HTTPException(status_code=400,
+                                detail='Choise connection ip or USB')
+        if printer.connection.ip and not printer.ip:
+            raise HTTPException(status_code=400,
+                                detail='Need write IP address')
         if not printer_id:
             raise HTTPException(status_code=400,
                                 detail='Model printer is not exist')
@@ -175,8 +181,18 @@ class HistoryCBV:
         return await crud.create_history_printer(self.db, self.user.id, history)
 
     @router.put('/history/{printer_id}')
-    async def update_history_printer(self, printer_id: int, ):
-        pass
+    async def update_history_printer(self,
+                                     printer_id: int,
+                                     printer: schemas.PrinterUpdate,):
+        if self.user.is_active:
+            log_api_route.info(f'Update record {self.user.email} ::: {printer.description}')
+            return await accouting.update_history_printer(self.db,
+                                                          printer_id,
+                                                          printer_update=printer,
+                                                          user_id=self.user.id, )
+        else:
+            raise HTTPException(status_code=403,
+                                detail="Forbidden, need right for this operation")
 
     @router.delete('/history/{printer_id}')
     async def erase_history_printer(self, printer_id: int, ):

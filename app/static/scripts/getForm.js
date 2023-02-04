@@ -93,6 +93,53 @@ function update_count_depart(values){
          });
      }
 
+ function update_printer() {
+    const TOKEN = localStorage.getItem('access_token');
+    printer_id = document.location.pathname.slice(16);
+    // получаем описание принтера из формы
+    var myForm = document.getElementById('formUpdatePrinter');
+    var qs = new URLSearchParams(new FormData(myForm));
+    let data = {printer:{}}
+    if(qs.get('connection')=='ip'){
+    data.printer.ip= qs.get('ip');
+    }
+    data.description = qs.get('description');
+    data.printer.model_id = qs.get('model_id');
+    data.printer.department_id = qs.get('department');
+    data.printer.connection= qs.get('connection');
+
+    data.printer.sn= qs.get('sn');
+    data.printer.condition= qs.get('condition');
+    data.printer.location= qs.get('location');
+
+
+
+    console.log('!!!!!!!!!')
+    console.log(data)
+    // Заполняем поля для запроса
+    url = window.location.origin + '/API/history/' + printer_id
+    config={
+            headers : {
+
+                'Authorization': `Bearer ${TOKEN}`,
+
+        },
+            params:{
+                'printer_id': printer_id,
+
+        },
+    };
+
+     axios.put(url, data, config)
+         .then(response => {
+            console.log(response.data);
+            window.location.replace(window.location.origin + "/printer/" + printer_id);
+         })
+        .catch(error => {
+            console.error(error);
+         });
+     }
+
 
 function router(values){
     console.log(`Переданные данные ${values}`)
