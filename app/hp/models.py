@@ -24,8 +24,10 @@ class Department(Base):
     company = sa.Column(sa.String, nullable=False)
     service = sa.Column(sa.Boolean, default=False)
     printers = orm.relationship("Printer", back_populates='department')
-    cartridge_counters = orm.relationship("CounterCartridge", back_populates='department')
-    journal_inner_consume = orm.relationship("JournalInnerConsume", back_populates='department')
+    cartridge_counters = orm.relationship("CounterCartridge",
+                                          back_populates='department')
+    journal_accounting_cartridges = orm.relationship("JournalAccountingCartridges",
+                                                     back_populates='department')
 
     def __repr__(self):
         return f'{self.name} {self.company}'
@@ -58,17 +60,18 @@ class CounterCartridge(Base):
                                           name='_cartridge_department'),)
 
 
-class JournalInnerConsume(Base):
-    __tablename__ = 'journal_inner_consume'
+class JournalAccountingCartridges(Base):
+    __tablename__ = 'journal_accounting_cartridges'
     id = sa.Column(sa.Integer, primary_key=True)
     id_cartridge = sa.Column(sa.Integer,
                              sa.ForeignKey('cartridge.id'))
     time_operation = sa.Column(sa.DateTime)
     department_id = sa.Column(sa.Integer, sa.ForeignKey('department.id'))
     department = orm.relationship(Department,
-                                  back_populates='journal_inner_consume')
+                                  back_populates='journal_accounting_cartridges')
     amount = sa.Column(sa.Integer)
-    name = sa.Column(UUID(as_uuid=True), sa.ForeignKey('user.id'))
+    created_by = sa.Column(UUID(as_uuid=True), sa.ForeignKey('user.id'))
+    notice = sa.Column(sa.String)
     unique_id_operation = sa.Column(sa.Integer)
 
 
