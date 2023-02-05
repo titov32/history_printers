@@ -1,0 +1,19 @@
+
+{% extends 'base.html' %}
+{% block title%} Модели принтеров {% endblock %}
+
+
+{% block content %}
+
+<H1> Отчет по использованию картриджа</H1>
+
+
+<h2>Общее количество зайдествованных картриджей: {{ all_quaintity_cartridge }} штук</h2>
+<p>  Отделы в которых стоят принтеры использующие данный картридж</p>
+
+{% for depart in list_department %}
+    <p> В отделе <b>{{depart[0]}}</b>  используетс <b> {{depart[1]}} </b> аппарат[а]</p>
+{% endfor %}
+
+<script src="/app/static/scripts/getForm.js"> </script>
+{% endblock %}

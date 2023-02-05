@@ -371,3 +371,18 @@ async def get_storehouse(request: Request,
                "departments": departments
                }
     return templates.TemplateResponse("counter_department.html", context)
+
+
+@hp_html_router.get("/report/cartridges/{cartridge_id}", response_class=HTMLResponse)
+async def get_storehouse(request: Request,
+                         cartridge_id: str,
+                         db: AsyncSession = Depends(get_db)):
+    list_department = await crud.get_list_depart_use_cart(db, int(cartridge_id))
+    if list_department is None:
+        raise HTTPException(status_code=404, detail="No department use this cartdige")
+    all_quaintity_cartridge = await crud.get_sum_all_by_id_cart(db, int(cartridge_id))
+    context = {"request": request,
+               "list_department": list_department,
+               "all_quaintity_cartridge": all_quaintity_cartridge
+               }
+    return templates.TemplateResponse("report_cartridge.html", context)

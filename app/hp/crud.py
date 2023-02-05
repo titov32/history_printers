@@ -1,6 +1,6 @@
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func, text
 from datetime import datetime
 
 from . import models
@@ -170,7 +170,7 @@ async def get_all_printers(db: AsyncSession):
 async def get_report_printer_not_work(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
         .join(models.ModelPrinter) \
-        .where(models.Printer.is_work == False)
+        .where(models.Printer.condition == 'require_repair')
     report = await db.execute(statement)
     return report.all()
 
@@ -178,7 +178,7 @@ async def get_report_printer_not_work(db: AsyncSession):
 async def get_report_printer_in_repair(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
         .join(models.ModelPrinter) \
-        .where(models.Printer.repairing == True)
+        .where(models.Printer.condition == 'repair')
     report = await db.execute(statement)
     return report.all()
 
@@ -186,7 +186,7 @@ async def get_report_printer_in_repair(db: AsyncSession):
 async def get_report_printer_free(db: AsyncSession):
     statement = select(models.Printer, models.ModelPrinter) \
         .join(models.ModelPrinter) \
-        .where(models.Printer.is_free == True)
+        .where(models.Printer.condition == 'reserve')
     report = await db.execute(statement)
     return report.all()
 
@@ -472,3 +472,40 @@ async def create_department(db: AsyncSession,
         raise
     await db.refresh(db_department)
     return db_department
+
+
+async def get_list_depart_use_cart(db: AsyncSession, id_cart: int):
+
+    stmt = text("""
+    SELECT department.name, count(*)
+    FROM model_printer
+    JOIN association_cartridge ON model_printer.id = association_cartridge.model_printer_id
+    JOIN cartridge ON association_cartridge.cartridge_id = cartridge.id
+    JOIN printer ON printer.model_id = model_printer.id
+    JOIN department ON department.id = printer.department_id
+    WHERE cartridge.id = :id_cart
+    GROUP BY department.name
+    """)
+    departments = await db.execute(stmt, {'id_cart':id_cart})
+    return departments.all()
+
+async def get_sum_all_by_id_cart(db: AsyncSession, id_cart: int):
+
+    stmt = text("""
+-- общая сумма картриджей
+    SELECT SUM(amount)
+    FROM (
+    SELECT number, amount
+    FROM storehouse
+    JOIN cartridge ON storehouse.id_cartridge=cartridge.id
+    WHERE cartridge.id = :id_cart
+    UNION ALL
+    
+    SELECT number, amount
+    FROM counter_cartridge
+    JOIN cartridge ON counter_cartridge.id_cartridge=cartridge.id
+    JOIN department ON counter_cartridge.department_id=department.id
+    WHERE cartridge.id = :id_cart) a;
+    """)
+    departments = await db.execute(stmt, {'id_cart':id_cart})
+    return departments.scalars().first()

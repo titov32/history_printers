@@ -4,6 +4,8 @@
 
 
 {% block content %}
+
+<h3>Для получение отчета по зайдествованию картриджа в предприятие перейдите по ссылки из названия картриджа</h3>
 <table class="table table-striped table-white">
     <thead class="thead-white">
 
@@ -17,7 +19,7 @@
     {% for cartridge in cartridges %}
     <tr>
          <td> {{cartridge.id}} </td>
-        <td> {{cartridge.number}} </td>
+        <td> <a href="/report/cartridges/{{cartridge.id}}" > {{cartridge.number}} </a> </td>
         <td> {{cartridge.reused}} </td>
         <td> <a href="/erase_cartridge/{{cartridge.id}}" > Удалить</a>
             <a href="/update_cartridge/{{cartridge.id}}" > Обновить</a>

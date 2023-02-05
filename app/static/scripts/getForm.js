@@ -144,9 +144,7 @@ function update_count_depart(values){
             console.log(response.data);
             window.location.replace(window.location.origin + "/printer/" + printer_id);
          })
-        .catch(error => {
-            console.error(error);
-         });
+        .catch((error)=>{ handler_error(error); } )
      }
 
 

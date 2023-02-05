@@ -158,7 +158,7 @@ class HistoryCBV:
     @router.post("/history")
     async def create_history_printer(self,
                                      history: schemas.HistoryBase = Depends(),
-                                     files: List[UploadFile] = File(...),):
+                                     files: List[UploadFile] = File(...), ):
         if self.user.is_active:
             files = [file for file in files]
             for file in files:
@@ -185,7 +185,7 @@ class HistoryCBV:
     @router.put('/history/{printer_id}')
     async def update_history_printer(self,
                                      printer_id: int,
-                                     printer: schemas.PrinterUpdate,):
+                                     printer: schemas.PrinterUpdate, ):
         if self.user.is_active:
             log_api_route.info(f'Update record {self.user.email} ::: {printer.description}')
             return await accouting.update_history_printer(self.db,
@@ -230,28 +230,26 @@ class StoreHouseCBV:
             raise HTTPException(status_code=403,
                                 detail="Forbidden, need right for this operation")
 
+    @router.post(
+        "/storehouse/department")  # , response_model=schemas.Printer)
+    async def update_department_cartridge(self,
+                                          positions: schemas.UpdateDepartmentCartridge,
+                                          ):
+        if self.user.is_active:
+            if positions.operation == 'return_from_department':
+                # up unused == false and down department
+                # повышыем использованные и уменьшеаем кол-во у отдела
+                return await accouting.return_cartridge_from_departament(self.db, positions)
 
-@hp_api_router.post(
-    "/storehouse/department")  # , response_model=schemas.Printer)
-async def update_department_cartridge(
-        positions: schemas.UpdateDepartmentCartridge,
-        db: AsyncSession = Depends(get_db),
-        user: User = Depends(current_active_user)):
-    if user.is_active:
-        if positions.operation == 'return_from_department':
-            # up unused == false and down department
-            # повышыем использованные и уменьшеаем кол-во у отдела
-            await accouting.return_cartridge_from_departament(db, positions)
-
-        if positions.operation == 'transfer_to_department_with_return':
-            result = await accouting.put_cart_depart_with_return(db, positions)
-            return result
-        if positions.operation == 'replace':
-            print(positions.operation)
-            await accouting.replace_cartridge_departament(db, positions)
-    else:
-        raise HTTPException(status_code=403,
-                            detail="Forbidden, need right for this operation")
+            if positions.operation == 'transfer_to_department_with_return':
+                result = await accouting.put_cart_depart_with_return(self.db, positions)
+                return result
+            if positions.operation == 'replace':
+                print(positions.operation)
+                return await accouting.replace_cartridge_departament(self.db, positions)
+        else:
+            raise HTTPException(status_code=403,
+                                detail="Forbidden, need right for this operation")
 
 
 @hp_api_router.post("/department/")  # , response_model=schemas.Printer)
@@ -281,3 +279,16 @@ async def create_department(depart: schemas.DepartmentBase,
                             db: AsyncSession = Depends(get_db)):
     created_depart = await crud.create_department(db=db, department=depart)
     return created_depart
+
+
+@hp_api_router.get(
+    "/report/{cart_id}")  # , response_model=schemas.Cartridge
+async def report_cartridge(cartridge_id: int,
+                         db: AsyncSession = Depends(get_db)):
+    list_department = await crud.get_list_depart_use_cart(db, cartridge_id)
+    if list_department is None:
+        raise HTTPException(status_code=404, detail="No department use this cartdige")
+    all_quaintity_cartridge = await crud.get_sum_all_by_id_cart(db, cartridge_id)
+    return (list_department, all_quaintity_cartridge)
+
+
