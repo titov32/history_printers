@@ -42,7 +42,11 @@ function update_storehouse(values){
         headers: {'Authorization': `Bearer ${TOKEN}`}
     };
 	axios.post(url, data, config)
-        .then((response) => {console.log(response.data);})
+        .then((response) => {
+            console.log(response.data);
+            alert("Данные получены");
+                    }
+           )
         .catch((error)=>{ handler_error(error); } )
 
 }
@@ -69,7 +73,10 @@ function update_count_depart(values){
 	    headers: {'Authorization': `Bearer ${TOKEN}`}
 	};
 	axios.post(url, data, config)
-        .then((response) => {console.log(response.data);})
+        .then((response) => {
+            console.log(response.data);
+            alert("Данные получены");
+            })
         .catch((error)=>{ handler_error(error); } )
 }
 
