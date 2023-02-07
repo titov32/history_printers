@@ -54,7 +54,8 @@ class CounterCartridge(Base):
                                  back_populates='counter_cartridges')
     department_id = sa.Column(sa.Integer, sa.ForeignKey('department.id'))
     department = orm.relationship(Department,
-                                  back_populates='cartridge_counters')
+                                  back_populates='cartridge_counters',
+                                  lazy="joined")
     amount = sa.Column(sa.Integer)
     __table_args__ = (sa.UniqueConstraint('id_cartridge', 'department_id',
                                           name='_cartridge_department'),)

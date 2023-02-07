@@ -289,6 +289,10 @@ async def report_cartridge(cartridge_id: int,
     if list_department is None:
         raise HTTPException(status_code=404, detail="No department use this cartdige")
     all_quaintity_cartridge = await crud.get_sum_all_by_id_cart(db, cartridge_id)
-    return (list_department, all_quaintity_cartridge)
+    storehouse = await crud.get_sum_all_by_id_cart_in_storehouse(db, cartridge_id)
+    depart = await crud.get_all_by_id_cart_in_departs(db, cartridge_id)
+    cart_in_service = await  crud.get_used_cart(db, cartridge_id)
+
+    return (list_department, all_quaintity_cartridge, storehouse, depart, cart_in_service)
 
 

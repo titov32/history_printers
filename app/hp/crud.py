@@ -7,7 +7,7 @@ from . import models
 from app.auth import models as auth_models
 from . import schemas
 from .utils.qr import make_qr_code_by_path
-
+from .utils.logger import log_api_route
 
 async def create_user(db: AsyncSession, user: schemas.UserCreate):
     fake_hashed_password = user.password + "notreallyhashed"
@@ -118,13 +118,13 @@ async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
     if printer.ip:
         printer.ip = printer.ip.ip.exploded
     printer.condition = printer.condition.value
-    printer.connection= printer.connection.value
+    printer.connection = printer.connection.value
     db_printer = models.Printer(**printer.dict())
     db.add(db_printer)
     try:
         await db.commit()
     except Exception as e:
-        print(f'Error!!! {e}')
+        log_api_route("Ошибка созда")
         await db.rollback()
         raise
     await db.refresh(db_printer)
@@ -246,11 +246,11 @@ async def update_printer_with_history(db: AsyncSession,
                                       printer: schemas.PrinterBase,
                                       printer_id: int,
                                       description: schemas.HistoryBase,
-                                      user_id,):
+                                      user_id, ):
     if printer.ip:
         printer.ip = printer.ip.ip.exploded
     printer.condition = printer.condition.value
-    printer.connection= printer.connection.value
+    printer.connection = printer.connection.value
     db_history = models.History(**description.dict(), author_id=user_id,
                                 date=datetime.now())
 
@@ -274,7 +274,7 @@ async def get_cartridge_by_id(db: AsyncSession, cartridge_id: int):
 
 async def get_all_id_reused_cartridges(db: AsyncSession, list_id: list):
     stmt = select(models.Cartridge.id) \
-        .where(models.Cartridge.reused==True) \
+        .where(models.Cartridge.reused == True) \
         .where(models.Cartridge.id.in_(list_id))
     print(stmt)
     id_cartridges = await db.execute(stmt)
@@ -286,16 +286,19 @@ async def get_cartridges(db: AsyncSession):
     cartridges = await db.execute(statement)
     return cartridges.scalars().all()
 
+
 async def get_cartridges_unlinked(db: AsyncSession, model_id):
-    statement = select(models.Cartridge)\
+    statement = select(models.Cartridge) \
         .except_all(select(models.Cartridge)
-                 .select_from(models.association_cartridge) \
-                 .join(models.Cartridge,
-                       models.association_cartridge.c.cartridge_id == models.Cartridge.id) \
-                 .where(models.association_cartridge.c.model_printer_id == model_id))
+                    .select_from(models.association_cartridge) \
+                    .join(models.Cartridge,
+                          models.association_cartridge.c.cartridge_id == models.Cartridge.id) \
+                    .where(
+        models.association_cartridge.c.model_printer_id == model_id))
     print(statement)
     r = await db.execute(statement)
     return r.all()
+
 
 async def get_cartridges_by_model_id(db: AsyncSession, model_id: int):
     st = select(models.Cartridge).select_from(models.association_cartridge) \
@@ -344,9 +347,9 @@ async def delete_cartridge(db: AsyncSession, cartridge_id: int):
 
 
 def upsert_counter_cartridge(counter_cartridge: [
-                                       schemas.CounterCartridgeBase]):
+    schemas.CounterCartridgeBase]):
     # реализация создания записи картриджа в отделе
-    records =[]
+    records = []
     for record in counter_cartridge:
         stmt = insert(models.CounterCartridge) \
             .values(id_cartridge=record.id_cartridge,
@@ -430,7 +433,6 @@ async def upsert_cart_for_model(db: AsyncSession, model: int, cart: int):
     return await db.commit()
 
 
-
 async def delete_cart_for_model(db: AsyncSession, model: int, cart: int):
     delete_stmt = delete(models.association_cartridge) \
         .where(models.association_cartridge.c.model_printer_id == model,
@@ -475,7 +477,6 @@ async def create_department(db: AsyncSession,
 
 
 async def get_list_depart_use_cart(db: AsyncSession, id_cart: int):
-
     stmt = text("""
     SELECT department.name, count(*)
     FROM model_printer
@@ -486,11 +487,11 @@ async def get_list_depart_use_cart(db: AsyncSession, id_cart: int):
     WHERE cartridge.id = :id_cart
     GROUP BY department.name
     """)
-    departments = await db.execute(stmt, {'id_cart':id_cart})
+    departments = await db.execute(stmt, {'id_cart': id_cart})
     return departments.all()
 
-async def get_sum_all_by_id_cart(db: AsyncSession, id_cart: int):
 
+async def get_sum_all_by_id_cart(db: AsyncSession, id_cart: int):
     stmt = text("""
 -- общая сумма картриджей
     SELECT SUM(amount)
@@ -507,5 +508,33 @@ async def get_sum_all_by_id_cart(db: AsyncSession, id_cart: int):
     JOIN department ON counter_cartridge.department_id=department.id
     WHERE cartridge.id = :id_cart) a;
     """)
-    departments = await db.execute(stmt, {'id_cart':id_cart})
+    departments = await db.execute(stmt, {'id_cart': id_cart})
     return departments.scalars().first()
+
+
+async def get_sum_all_by_id_cart_in_storehouse(db: AsyncSession, id_cart: int):
+    stmt = select(func.sum(models.StoreHouse.amount)) \
+        .where(models.StoreHouse.id_cartridge == int(id_cart))
+
+    cart = await db.execute(stmt)
+    return cart.scalars().first()
+
+
+async def get_all_by_id_cart_in_departs(db: AsyncSession, id_cart: int):
+    stmt = select(models.CounterCartridge) \
+        .join(models.Department) \
+        .where(models.CounterCartridge.id_cartridge == int(id_cart)) \
+        .where(models.Department.service == False)
+
+    cart = await db.execute(stmt)
+    return cart.scalars().all()
+
+
+async def get_used_cart(db: AsyncSession, id_cart: int):
+    stmt = select(models.CounterCartridge) \
+        .join(models.Department) \
+        .where(models.CounterCartridge.id_cartridge == int(id_cart)) \
+        .where(models.Department.service == True)
+
+    cart = await db.execute(stmt)
+    return cart.scalars().all()

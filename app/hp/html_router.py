@@ -381,8 +381,15 @@ async def get_storehouse(request: Request,
     if list_department is None:
         raise HTTPException(status_code=404, detail="No department use this cartdige")
     all_quaintity_cartridge = await crud.get_sum_all_by_id_cart(db, int(cartridge_id))
+    storehouse = await crud.get_sum_all_by_id_cart_in_storehouse(db,
+                                                                 cartridge_id)
+    depart = await crud.get_all_by_id_cart_in_departs(db, cartridge_id)
+    cart_in_service = await  crud.get_used_cart(db, cartridge_id)
     context = {"request": request,
                "list_department": list_department,
-               "all_quaintity_cartridge": all_quaintity_cartridge
+               "all_quaintity_cartridge": all_quaintity_cartridge,
+               "storehouse":storehouse,
+               "depart":depart,
+               "cart_in_service":cart_in_service
                }
     return templates.TemplateResponse("report_cartridge.html", context)
