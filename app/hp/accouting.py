@@ -68,7 +68,7 @@ async def put_cartridge_departament(db: AsyncSession,
 
 async def put_cart_depart_with_return(db: AsyncSession,
                                       store_house_list: schemas.UpdateDepartmentCartridge):
-    # TODO нужно реализовать передачу картриджа отделу c возвратом
+    # передача картриджа отделу c возвратом
     # нужно повысить счетчик отдела и понизить счетчик на складе
     records = crud.upsert_counter_cartridge(
         counter_cartridge=store_house_list.cartridges)

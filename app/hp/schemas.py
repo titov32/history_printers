@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel
 from ipaddress import IPv4Interface
@@ -67,11 +68,13 @@ class StoreHouseBase(BaseModel):
 class UpdateDepartmentCartridge(BaseModel):
     operation: str
     cartridges: List[CounterCartridgeBase]
+    notice: str
 
 
 class UpdateStoreHouseBase(BaseModel):
     operation: str
     cartridges: List[StoreHouseBase]
+
 
 
 class StoreHouse(StoreHouseBase):
@@ -83,15 +86,17 @@ class StoreHouse(StoreHouseBase):
 
 class JournalInnerConsumeBase(BaseModel):
     id_cartridge: int
-    departament: int
+    departament_id: int
     amount: int
-    name: int
+    created_by: int
     unique_id_operation: int
+    notice: str
+
 
 
 class JournalInnerConsume(JournalInnerConsumeBase):
     id: int
-
+    time_operation: datetime
     class Config:
         orm_mode = True
 

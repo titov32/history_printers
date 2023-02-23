@@ -65,6 +65,7 @@ function update_count_depart(values){
                 }
         }
     cartridges.operation = values.operation
+    cartridges.notice = values.notice
     console.log('values:', values)
 	console.log('v4', JSON.stringify(cartridges))
 	url = window.location.origin + '/API/storehouse/department';

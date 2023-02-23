@@ -160,27 +160,37 @@ class HistoryCBV:
                                      history: schemas.HistoryBase = Depends(),
                                      files: List[UploadFile] = File(...), ):
         if self.user.is_active:
-            files = [file for file in files]
-            for file in files:
-                log_api_route.debug(f'files: {file}')
-                file_location = f"app/static/img/{file.filename}"
-                history.path_file = file_location
-                with open(file_location, "wb+") as file_object:
-                    file_object.write(file.file.read())
-                    try:
-                        coordinate = get_address(file_location)
-                        address = coordinate.get('address')
-                        history.latitude = coordinate.get('latitude')
-                        history.longitude = coordinate.get('longitude')
-                        if address:
-                            history.description += f'Адрес: {address}'
-                    except Exception as e:
-                        print(e)
+            if files:
+                files = [file for file in files]
+                for file in files:
+                    log_api_route.debug(f'files: {file}')
+                    file_location = f"app/static/img/{file.filename}"
+                    history.path_file = file_location
+                    with open(file_location, "wb+") as file_object:
+                        file_object.write(file.file.read())
+                        try:
+                            coordinate = get_address(file_location)
+                            address = coordinate.get('address')
+                            history.latitude = coordinate.get('latitude')
+                            history.longitude = coordinate.get('longitude')
+                            if address:
+                                history.description += f'Адрес: {address}'
+                            log_api_route.info(
+                                f'Create record {self.user.email} ::: {history.description}')
+
+                        except Exception as e:
+                            print(e)
+                return await crud.create_history_printer(self.db,
+                                                         self.user.id,
+                                                         history)
+            else:
+                log_api_route.info(
+                    f'Create record {self.user.email} ::: {history.description}')
+                return await crud.create_history_printer(self.db, self.user.id,
+                                                         history)
         else:
             raise HTTPException(status_code=403,
                                 detail="Forbidden, need right for this operation")
-        log_api_route.info(f'Create record {self.user.email} ::: {history.description}')
-        return await crud.create_history_printer(self.db, self.user.id, history)
 
     @router.put('/history/{printer_id}')
     async def update_history_printer(self,
@@ -194,7 +204,8 @@ class HistoryCBV:
                                                           user_id=self.user.id, )
         else:
             raise HTTPException(status_code=403,
-                                detail="Forbidden, need right for this operation")
+                                detail="Forbidden, need right for this "
+                                       "operation")
 
     @router.delete('/history/{printer_id}')
     async def erase_history_printer(self, printer_id: int, ):
@@ -259,21 +270,6 @@ async def create_department(depart: schemas.DepartmentBase,
     return created_depart
 
 
-@hp_api_router.post("/storehouse/department")  # , response_model=schemas.Printer)
-async def update_department_cartridge(positions: schemas.UpdateDepartmentCartridge,
-                                      db: AsyncSession = Depends(get_db)):
-    if positions.operation == 'return_from_department':
-        # up unused == false and down department
-        await accouting.return_cartridge_from_departament(db, positions)
-
-    if positions.operation == 'transfer_to_department_with_return':
-        result = await accouting.put_cart_depart_with_return(db, positions)
-        return result
-    if positions.operation == 'replace':
-        print(positions.operation)
-        await accouting.replace_cartridge_departament(db, positions)
-
-
 @hp_api_router.post("/department/")  # , response_model=schemas.Printer)
 async def create_department(depart: schemas.DepartmentBase,
                             db: AsyncSession = Depends(get_db)):
@@ -288,11 +284,15 @@ async def report_cartridge(cartridge_id: int,
     list_department = await crud.get_list_depart_use_cart(db, cartridge_id)
     if list_department is None:
         raise HTTPException(status_code=404, detail="No department use this cartdige")
+    # Получение общего количества картриджей
     all_quaintity_cartridge = await crud.get_sum_all_by_id_cart(db, cartridge_id)
+    # Получение количества хранимого на складе
     storehouse = await crud.get_sum_all_by_id_cart_in_storehouse(db, cartridge_id)
+    # Получение по отделам
     depart = await crud.get_all_by_id_cart_in_departs(db, cartridge_id)
+    # Получение использованных катриджей требующих заправки
     cart_in_service = await  crud.get_used_cart(db, cartridge_id)
 
-    return (list_department, all_quaintity_cartridge, storehouse, depart, cart_in_service)
+    return list_department, all_quaintity_cartridge, storehouse, depart, cart_in_service
 
 

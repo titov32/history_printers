@@ -124,7 +124,7 @@ async def create_printer(db: AsyncSession, printer: schemas.PrinterCreate):
     try:
         await db.commit()
     except Exception as e:
-        log_api_route("Ошибка созда")
+        log_api_route(f"Ошибка создания: {{e}}")
         await db.rollback()
         raise
     await db.refresh(db_printer)
